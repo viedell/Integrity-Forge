@@ -10,7 +10,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import StudentPortal from "@/pages/StudentPortal";
 import InstructorDashboard from "@/pages/InstructorDashboard";
+import InstructorTemplates from "@/pages/InstructorTemplates";
 import AdminConsole from "@/pages/AdminConsole";
+import AdminActivity from "@/pages/AdminActivity";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/Onboarding";
 import SignInPage from "@/pages/SignInPage";
@@ -164,10 +166,32 @@ function AppRoutes() {
         </Show>
       </Route>
 
+      <Route path="/instructor/templates">
+        <Show when="signed-in">
+          <RoleGate role={userRole ?? null} dest="instructor">
+            <InstructorTemplates />
+          </RoleGate>
+        </Show>
+        <Show when="signed-out">
+          <Redirect to="/sign-in" />
+        </Show>
+      </Route>
+
       <Route path="/admin">
         <Show when="signed-in">
           <RoleGate role={userRole ?? null} dest="admin">
             <AdminConsole />
+          </RoleGate>
+        </Show>
+        <Show when="signed-out">
+          <Redirect to="/sign-in" />
+        </Show>
+      </Route>
+
+      <Route path="/admin/activity">
+        <Show when="signed-in">
+          <RoleGate role={userRole ?? null} dest="admin">
+            <AdminActivity />
           </RoleGate>
         </Show>
         <Show when="signed-out">
