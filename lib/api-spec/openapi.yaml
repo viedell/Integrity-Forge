@@ -3,13 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: IntegrityForge API — academic integrity analysis platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: submissions
+    description: Student document submissions and AI/plagiarism checks
+  - name: disputes
+    description: Student dispute requests for false-positive flags
+  - name: assignments
+    description: Assignment management
+  - name: templates
+    description: Instructor skeleton code templates
+  - name: analysis
+    description: Similarity and collusion graph analysis
+  - name: stats
+    description: Dashboard statistics and activity feeds
+
 paths:
   /healthz:
     get:
@@ -24,6 +37,383 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /submissions:
+    get:
+      operationId: listSubmissions
+      tags: [submissions]
+      summary: List all submissions
+      parameters:
+        - name: assignmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+            enum: [clean, flagged_ai, flagged_plagiarism, disputed, pending, null]
+      responses:
+        "200":
+          description: List of submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Submission"
+    post:
+      operationId: createSubmission
+      tags: [submissions]
+      summary: Submit a document for pre-check analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionInput"
+      responses:
+        "201":
+          description: Submission created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "400":
+          description: Bad request
+
+  /submissions/{id}:
+    get:
+      operationId: getSubmission
+      tags: [submissions]
+      summary: Get a submission by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Submission details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateSubmission
+      tags: [submissions]
+      summary: Update submission status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionUpdate"
+      responses:
+        "200":
+          description: Updated submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "404":
+          description: Not found
+
+  /disputes:
+    get:
+      operationId: listDisputes
+      tags: [disputes]
+      summary: List all dispute requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+            enum: [pending, approved, rejected, null]
+      responses:
+        "200":
+          description: List of disputes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dispute"
+    post:
+      operationId: createDispute
+      tags: [disputes]
+      summary: Submit a dispute rationale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisputeInput"
+      responses:
+        "201":
+          description: Dispute submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dispute"
+        "400":
+          description: Bad request
+
+  /disputes/{id}:
+    get:
+      operationId: getDispute
+      tags: [disputes]
+      summary: Get a dispute by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dispute details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dispute"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDispute
+      tags: [disputes]
+      summary: Update dispute status (approve/reject)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisputeUpdate"
+      responses:
+        "200":
+          description: Updated dispute
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dispute"
+        "404":
+          description: Not found
+
+  /assignments:
+    get:
+      operationId: listAssignments
+      tags: [assignments]
+      summary: List all assignments
+      responses:
+        "200":
+          description: List of assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+    post:
+      operationId: createAssignment
+      tags: [assignments]
+      summary: Create an assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentInput"
+      responses:
+        "201":
+          description: Assignment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "400":
+          description: Bad request
+
+  /assignments/{id}:
+    get:
+      operationId: getAssignment
+      tags: [assignments]
+      summary: Get an assignment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Assignment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "404":
+          description: Not found
+
+  /templates:
+    get:
+      operationId: listTemplates
+      tags: [templates]
+      summary: List all assignment templates
+      responses:
+        "200":
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Template"
+    post:
+      operationId: createTemplate
+      tags: [templates]
+      summary: Upload an assignment skeleton code template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TemplateInput"
+      responses:
+        "201":
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+        "400":
+          description: Bad request
+
+  /templates/{id}:
+    get:
+      operationId: getTemplate
+      tags: [templates]
+      summary: Get a template by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTemplate
+      tags: [templates]
+      summary: Delete a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /similarity-graph:
+    get:
+      operationId: getSimilarityGraph
+      tags: [analysis]
+      summary: Get the full similarity/collusion graph
+      parameters:
+        - name: assignmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: threshold
+          in: query
+          description: Minimum similarity score (0-100) to include in graph
+          schema:
+            type: ["number", "null"]
+      responses:
+        "200":
+          description: Similarity graph with nodes and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimilarityGraph"
+
+  /similarity-edges:
+    post:
+      operationId: createSimilarityEdge
+      tags: [analysis]
+      summary: Record a similarity relationship between two submissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimilarityEdgeInput"
+      responses:
+        "201":
+          description: Edge created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimilarityEdge"
+
+  /stats:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /activity:
+    get:
+      operationId: listActivity
+      tags: [stats]
+      summary: Get recent activity feed
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Recent activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +424,255 @@ components:
       required:
         - status
 
+    Submission:
+      type: object
+      required: [id, assignmentId, studentName, content, status, aiScore, plagiarismScore, createdAt]
+      properties:
+        id:
+          type: integer
+        assignmentId:
+          type: integer
+        studentName:
+          type: string
+        studentEmail:
+          type: ["string", "null"]
+        content:
+          type: string
+        status:
+          type: string
+          enum: [pending, clean, flagged_ai, flagged_plagiarism, disputed]
+        aiScore:
+          type: number
+          description: AI-generated content probability (0-100)
+        plagiarismScore:
+          type: number
+          description: Plagiarism similarity score (0-100)
+        wordCount:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    SubmissionInput:
+      type: object
+      required: [assignmentId, studentName, content]
+      properties:
+        assignmentId:
+          type: integer
+        studentName:
+          type: string
+          minLength: 1
+        studentEmail:
+          type: string
+        content:
+          type: string
+          minLength: 1
+
+    SubmissionUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, clean, flagged_ai, flagged_plagiarism, disputed]
+        aiScore:
+          type: number
+        plagiarismScore:
+          type: number
+
+    Dispute:
+      type: object
+      required: [id, submissionId, studentName, rationale, status, createdAt]
+      properties:
+        id:
+          type: integer
+        submissionId:
+          type: integer
+        studentName:
+          type: string
+        rationale:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        instructorNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    DisputeInput:
+      type: object
+      required: [submissionId, studentName, rationale]
+      properties:
+        submissionId:
+          type: integer
+        studentName:
+          type: string
+          minLength: 1
+        rationale:
+          type: string
+          minLength: 10
+
+    DisputeUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        instructorNote:
+          type: string
+
+    Assignment:
+      type: object
+      required: [id, title, courseId, courseName, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        courseId:
+          type: string
+        courseName:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        submissionCount:
+          type: ["integer", "null"]
+        flaggedCount:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    AssignmentInput:
+      type: object
+      required: [title, courseId, courseName]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        courseId:
+          type: string
+          minLength: 1
+        courseName:
+          type: string
+          minLength: 1
+        dueDate:
+          type: string
+
+    Template:
+      type: object
+      required: [id, assignmentId, filename, content, createdAt]
+      properties:
+        id:
+          type: integer
+        assignmentId:
+          type: integer
+        filename:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    TemplateInput:
+      type: object
+      required: [assignmentId, filename, content]
+      properties:
+        assignmentId:
+          type: integer
+        filename:
+          type: string
+          minLength: 1
+        content:
+          type: string
+
+    SimilarityGraph:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimilarityNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimilarityEdge"
+
+    SimilarityNode:
+      type: object
+      required: [id, submissionId, studentName, status]
+      properties:
+        id:
+          type: string
+        submissionId:
+          type: integer
+        studentName:
+          type: string
+        status:
+          type: string
+
+    SimilarityEdge:
+      type: object
+      required: [id, sourceSubmissionId, targetSubmissionId, similarityScore]
+      properties:
+        id:
+          type: integer
+        sourceSubmissionId:
+          type: integer
+        targetSubmissionId:
+          type: integer
+        similarityScore:
+          type: number
+          description: Similarity score (0-100)
+
+    SimilarityEdgeInput:
+      type: object
+      required: [sourceSubmissionId, targetSubmissionId, similarityScore]
+      properties:
+        sourceSubmissionId:
+          type: integer
+        targetSubmissionId:
+          type: integer
+        similarityScore:
+          type: number
+
+    DashboardStats:
+      type: object
+      required: [totalSubmissions, cleanCount, flaggedAiCount, flaggedPlagiarismCount, disputesPending, disputesApproved, disputesRejected, totalAssignments, aiDetectionRate]
+      properties:
+        totalSubmissions:
+          type: integer
+        cleanCount:
+          type: integer
+        flaggedAiCount:
+          type: integer
+        flaggedPlagiarismCount:
+          type: integer
+        disputesPending:
+          type: integer
+        disputesApproved:
+          type: integer
+        disputesRejected:
+          type: integer
+        totalAssignments:
+          type: integer
+        aiDetectionRate:
+          type: number
+          description: Percentage of submissions flagged for AI
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [submission, dispute, analysis, template]
+        description:
+          type: string
+        submissionId:
+          type: ["integer", "null"]
+        studentName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
