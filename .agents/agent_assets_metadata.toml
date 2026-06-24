@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "4PJpkfubrKsqc8QXvt3NT"
+uri = "file://integrity-forge.tar.gz"
+type = "unspecified"
+title = "IntegrityForge Source Code"
