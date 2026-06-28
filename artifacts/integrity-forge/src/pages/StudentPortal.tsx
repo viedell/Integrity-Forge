@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useListSubmissions, useCreateSubmission, useListAssignments, useCreateDispute, getListSubmissionsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -105,6 +106,7 @@ function SubmissionDetail({ sub, assignmentLabel }: { sub: Submission; assignmen
 }
 
 export default function StudentPortal() {
+  const { user } = useUser();
   const { data: assignments = [], isLoading: loadingAssignments } = useListAssignments();
   const { data: submissions = [], isLoading: loadingSubmissions } = useListSubmissions();
 
@@ -113,10 +115,18 @@ export default function StudentPortal() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const clerkName = user?.fullName || user?.username || user?.primaryEmailAddress?.emailAddress || "";
+  const clerkEmail = user?.primaryEmailAddress?.emailAddress || "";
+
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [assignmentId, setAssignmentId] = useState<string>("");
   const [content, setContent] = useState("");
+
+  useEffect(() => {
+    if (clerkName) setStudentName(clerkName);
+    if (clerkEmail) setStudentEmail(clerkEmail);
+  }, [clerkName, clerkEmail]);
 
   const [disputeSubmissionId, setDisputeSubmissionId] = useState<number | null>(null);
   const [disputeRationale, setDisputeRationale] = useState("");
@@ -183,12 +193,12 @@ export default function StudentPortal() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="studentName">Full Name</Label>
-                  <Input id="studentName" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Jane Doe" required />
+                  <Input id="studentName" value={studentName} readOnly className="bg-secondary/30 cursor-not-allowed" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="studentEmail">Email (Optional)</Label>
-                  <Input id="studentEmail" type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} placeholder="jane.doe@university.edu" />
+                  <Label htmlFor="studentEmail">Email</Label>
+                  <Input id="studentEmail" type="email" value={studentEmail} readOnly className="bg-secondary/30 cursor-not-allowed" />
                 </div>
 
                 <div className="space-y-2">

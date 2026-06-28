@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { eq, and, SQL } from "drizzle-orm";
-import { db, submissionsTable, activityTable } from "@workspace/db";
+import { getAuth } from "@clerk/express";
+import { db, submissionsTable, activityTable, usersTable } from "@workspace/db";
 import { serializeDates } from "../lib/serialize";
 import {
   ListSubmissionsQueryParams,
@@ -30,6 +31,15 @@ router.get("/submissions", async (req, res): Promise<void> => {
     conditions.push(eq(submissionsTable.status, params.data.status));
   }
 
+  // If the caller is an authenticated student, scope to their own submissions only
+  const auth = getAuth(req);
+  if (auth?.userId) {
+    const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.clerkId, auth.userId));
+    if (dbUser?.role === "student") {
+      conditions.push(eq(submissionsTable.clerkId, auth.userId));
+    }
+  }
+
   const rows =
     conditions.length > 0
       ? await db
@@ -57,9 +67,12 @@ router.post("/submissions", async (req, res): Promise<void> => {
   if (aiScore >= 70) status = "flagged_ai";
   else if (plagiarismScore >= 50) status = "flagged_plagiarism";
 
+  const auth = getAuth(req);
+  const clerkId = auth?.userId ?? null;
+
   const [submission] = await db
     .insert(submissionsTable)
-    .values({ ...parsed.data, wordCount, aiScore, plagiarismScore, status })
+    .values({ ...parsed.data, clerkId, wordCount, aiScore, plagiarismScore, status })
     .returning();
 
   await db.insert(activityTable).values({

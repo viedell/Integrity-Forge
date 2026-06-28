@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
 import { useLocation } from "wouter";
-import { ShieldAlert, User, Presentation, Database, LogOut } from "lucide-react";
+import { ShieldAlert, User, Presentation, LogOut } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -23,13 +23,6 @@ const roles: { key: Role; label: string; description: string; icon: React.ReactN
     description: "Review submissions, analyze the collusion graph, manage disputes, and upload templates.",
     icon: <Presentation className="w-8 h-8 text-primary" />,
     dest: "/instructor",
-  },
-  {
-    key: "admin",
-    label: "System Admin",
-    description: "Access global stats, the full submissions list, and the complete audit activity feed.",
-    icon: <Database className="w-8 h-8 text-primary" />,
-    dest: "/admin",
   },
 ];
 
