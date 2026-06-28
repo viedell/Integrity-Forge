@@ -2,10 +2,38 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useGetDashboardStats, useListActivity, useListSubmissions, useListAssignments } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivityItemType } from "@workspace/api-client-react/src/generated/api.schemas";
-import { Shield, FileText, CheckCircle, AlertTriangle, Scale, Activity } from "lucide-react";
+import { Shield, FileText, CheckCircle, AlertTriangle, Scale, Activity, Download } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+function exportCsv(submissions: ReturnType<typeof useListSubmissions>["data"], assignments: ReturnType<typeof useListAssignments>["data"]) {
+  const rows = (submissions ?? []).map(sub => {
+    const assignment = (assignments ?? []).find(a => a.id === sub.assignmentId);
+    return [
+      sub.id,
+      sub.studentName,
+      sub.studentEmail ?? "",
+      assignment?.courseId ?? sub.assignmentId,
+      assignment?.title ?? `Assignment ${sub.assignmentId}`,
+      sub.aiScore,
+      sub.plagiarismScore,
+      sub.wordCount ?? "",
+      sub.status,
+      new Date(sub.createdAt).toISOString(),
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(",");
+  });
+  const header = ["ID","Student Name","Email","Course ID","Assignment","AI Score","Plagiarism Score","Word Count","Status","Submitted At"].join(",");
+  const csv = [header, ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `submissions-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function AdminConsole() {
   const { data: stats, isLoading: loadingStats } = useGetDashboardStats();
@@ -213,8 +241,22 @@ export default function AdminConsole() {
         <TabsContent value="submissions">
           <Card>
             <CardHeader>
-              <CardTitle>Global Submissions Database</CardTitle>
-              <CardDescription>Comprehensive view of all submissions across the entire institution</CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle>Global Submissions Database</CardTitle>
+                  <CardDescription>Comprehensive view of all submissions across the entire institution</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 shrink-0"
+                  disabled={loadingSubmissions || submissions.length === 0}
+                  onClick={() => exportCsv(submissions, assignments)}
+                >
+                  <Download className="w-4 h-4" />
+                  Export CSV
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {loadingSubmissions || loadingAssignments ? (

@@ -9,13 +9,16 @@ import {
   useListTemplates,
   useCreateTemplate,
   useDeleteTemplate,
+  useCreateAssignment,
   getListDisputesQueryKey,
-  getListTemplatesQueryKey
+  getListTemplatesQueryKey,
+  getListAssignmentsQueryKey,
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CollusionGraph } from "@/components/ui/CollusionGraph";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Users, AlertTriangle, Trash2, Upload } from "lucide-react";
+import { FileText, Trash2, Upload, Plus } from "lucide-react";
 
 export default function InstructorDashboard() {
   const { data: assignments = [], isLoading: loadingAssignments } = useListAssignments();
@@ -47,11 +50,36 @@ export default function InstructorDashboard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const createAssignment = useCreateAssignment();
+  const [newAssignmentOpen, setNewAssignmentOpen] = useState(false);
+  const [newCourseId, setNewCourseId] = useState("");
+  const [newCourseName, setNewCourseName] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newDueDate, setNewDueDate] = useState("");
+
   const [instructorNote, setInstructorNote] = useState<Record<number, string>>({});
-  
+
   // Template Form State
   const [templateFilename, setTemplateFilename] = useState("");
   const [templateContent, setTemplateContent] = useState("");
+
+  const handleCreateAssignment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCourseId || !newCourseName || !newTitle) return;
+    createAssignment.mutate(
+      { data: { courseId: newCourseId, courseName: newCourseName, title: newTitle, dueDate: newDueDate || undefined } },
+      {
+        onSuccess: (created) => {
+          toast({ title: "Assignment created", description: `${created.courseId}: ${created.title} has been added.` });
+          queryClient.invalidateQueries({ queryKey: getListAssignmentsQueryKey() });
+          setSelectedAssignmentId(created.id.toString());
+          setNewCourseId(""); setNewCourseName(""); setNewTitle(""); setNewDueDate("");
+          setNewAssignmentOpen(false);
+        },
+        onError: () => toast({ title: "Error", description: "Failed to create assignment.", variant: "destructive" }),
+      }
+    );
+  };
 
   const handleDisputeAction = (id: number, status: 'approved' | 'rejected') => {
     updateDispute.mutate({
@@ -121,6 +149,46 @@ export default function InstructorDashboard() {
             </SelectContent>
           </Select>
         </div>
+
+        <Dialog open={newAssignmentOpen} onOpenChange={setNewAssignmentOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 shrink-0">
+              <Plus className="w-4 h-4" /> New Assignment
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Assignment</DialogTitle>
+              <DialogDescription>Add a new assignment to the platform for students to submit against.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreateAssignment} className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="courseId">Course ID</Label>
+                  <Input id="courseId" value={newCourseId} onChange={e => setNewCourseId(e.target.value)} placeholder="CS101" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="courseName">Course Name</Label>
+                  <Input id="courseName" value={newCourseName} onChange={e => setNewCourseName(e.target.value)} placeholder="Introduction to CS" required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assignTitle">Assignment Title</Label>
+                <Input id="assignTitle" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Final Essay" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dueDate">Due Date (Optional)</Label>
+                <Input id="dueDate" type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setNewAssignmentOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={createAssignment.isPending || !newCourseId || !newCourseName || !newTitle}>
+                  {createAssignment.isPending ? "Creating…" : "Create Assignment"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
