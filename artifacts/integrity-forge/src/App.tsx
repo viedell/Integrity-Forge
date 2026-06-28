@@ -13,6 +13,7 @@ import InstructorDashboard from "@/pages/InstructorDashboard";
 import InstructorTemplates from "@/pages/InstructorTemplates";
 import AdminConsole from "@/pages/AdminConsole";
 import AdminActivity from "@/pages/AdminActivity";
+import AdminUsers from "@/pages/AdminUsers";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/Onboarding";
 import SignInPage from "@/pages/SignInPage";
@@ -192,6 +193,17 @@ function AppRoutes() {
         <Show when="signed-in">
           <RoleGate role={userRole ?? null} dest="admin">
             <AdminActivity />
+          </RoleGate>
+        </Show>
+        <Show when="signed-out">
+          <Redirect to="/sign-in" />
+        </Show>
+      </Route>
+
+      <Route path="/admin/users">
+        <Show when="signed-in">
+          <RoleGate role={userRole ?? null} dest="admin">
+            <AdminUsers />
           </RoleGate>
         </Show>
         <Show when="signed-out">

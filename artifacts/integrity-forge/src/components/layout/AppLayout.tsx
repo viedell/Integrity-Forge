@@ -64,6 +64,11 @@ export function AppLayout({ children, title, subtitle, role }: {
                     Audit Log
                   </span>
                 </Link>
+                <Link href="/admin/users">
+                  <span className={`cursor-pointer hover:text-foreground transition-colors ${location.includes("users") ? "text-foreground" : ""}`}>
+                    Users
+                  </span>
+                </Link>
               </>
             )}
 
