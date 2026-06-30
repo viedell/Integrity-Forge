@@ -88,7 +88,15 @@ const BLACKLISTED_PHRASES = new Set([
   "data analysis", "study findings", "research results", "current study",
   "current research", "existing literature", "future research", "future work",
   "various factors", "multiple aspects", "different approaches", "key challenges",
-  "significant impact", "important role", "various methods", "existing methods"
+  "significant impact", "important role", "various methods", "existing methods",
+  // Academic boilerplate verb phrases that are NOT research topics
+  "future work should", "work should investigate", "work should explore",
+  "research should prioritize", "research should investigate", "research should explore",
+  "future research should", "future studies should", "should investigate",
+  "should explore", "should prioritize", "should establish", "should address",
+  "publication date", "systematic literature", "literature review",
+  "experimental evaluation", "experimental results", "remaining challenges",
+  "remaining limitations", "existing studies", "existing research"
 ]);
 
 // ---------------------------------------------------------------------------
@@ -104,6 +112,10 @@ function isValidNounPhrase(phrase: string): boolean {
 
   // Hard blacklist
   if (BLACKLISTED_PHRASES.has(lower)) return false;
+
+  // Reject phrases containing modal/auxiliary verbs (these are action fragments, not concepts)
+  const modalVerbs = new Set(["should", "could", "would", "must", "shall", "might", "will", "may"]);
+  if (words.some(w => modalVerbs.has(w))) return false;
 
   // Invalid start words
   if (STOP_ADJECTIVES_START.has(words[0]) || STOP_WORDS_END.has(words[0])) return false;

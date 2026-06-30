@@ -105,12 +105,24 @@ function AppRoutes() {
   const [userRole, setUserRole] = useState<UserRole | undefined>(undefined);
   const [roleLoaded, setRoleLoaded] = useState(false);
 
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!user) {
+    if (!isLoaded) {
+      setRoleLoaded(false);
+      setUserRole(undefined);
+      return;
+    }
+    if (!userId) {
+      setUserRole(null);
       setRoleLoaded(true);
       return;
     }
+    
+    // Set to loading when user changes to fetch their specific role
+    setRoleLoaded(false);
+    setUserRole(undefined);
+
     fetch("/api/me")
       .then((r) => r.json())
       .then((data) => {
@@ -121,7 +133,7 @@ function AppRoutes() {
         setUserRole(null);
         setRoleLoaded(true);
       });
-  }, [user, isLoaded]);
+  }, [userId, isLoaded]);
 
   if (!isLoaded || !roleLoaded) return null;
 
@@ -132,7 +144,7 @@ function AppRoutes() {
 
       <Route path="/">
         <Show when="signed-in">
-          {userRole === null ? <Redirect to="/onboarding" /> : <Redirect to={`/${userRole}`} />}
+          {userRole === null || userRole === undefined ? <Redirect to="/onboarding" /> : <Redirect to={`/${userRole}`} />}
         </Show>
         <Show when="signed-out">
           <Home />

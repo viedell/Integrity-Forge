@@ -1,4 +1,4 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { eq } from "drizzle-orm";
 import { getAuth } from "@clerk/express";
 import { db, gapAnalysesTable } from "@workspace/db";
@@ -47,7 +47,7 @@ router.post("/gap-analyses", async (req, res): Promise<void> => {
     filename: p.filename || `paper_${idx + 1}.txt`,
   }));
 
-  const analysis = analyzeResearchGaps(papersWithId);
+  const analysis = analyzeResearchGaps(papersWithId, projectName);
 
   const auth = getAuth(req);
   const clerkId = auth?.userId ?? null;

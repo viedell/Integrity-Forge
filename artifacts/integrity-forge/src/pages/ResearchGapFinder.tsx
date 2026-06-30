@@ -50,6 +50,7 @@ export default function ResearchGapFinder() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
+  const [savedProjectName, setSavedProjectName] = useState("");
 
   // Paper Entry Form State
   const [paperTitle, setPaperTitle] = useState("");
@@ -64,6 +65,8 @@ export default function ResearchGapFinder() {
     e.preventDefault();
     if (!newProjectName.trim()) return;
 
+    // Save the project name before clearing the form (used as domain hint for the analyzer)
+    setSavedProjectName(newProjectName.trim());
     // Reset forms and list
     setPapersList([]);
     setNewProjectName("");
@@ -122,7 +125,7 @@ export default function ResearchGapFinder() {
   const handleRunAnalysis = () => {
     if (papersList.length === 0) return;
 
-    const projectName = selectedProjectId === "new-temp" ? "My Research Collection" : (selectedProject?.projectName || "Research Project");
+    const projectName = selectedProjectId === "new-temp" ? (savedProjectName || "My Research Collection") : (selectedProject?.projectName || "Research Project");
 
     createGapAnalysis.mutate({
       data: {

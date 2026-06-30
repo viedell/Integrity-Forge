@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // pipeline.ts  –  Orchestrator: runs all stages in sequence
 // ============================================================
 import type { PaperInput, AnalyzerResult } from "./types";
@@ -10,13 +10,14 @@ import { generateGaps }      from "./04_gap_generator";
 import { filterValidGaps }   from "./05_gap_validator";
 import { mergeDuplicateGaps } from "./06_duplicate_detector";
 
-export function runGapAnalysisPipeline(papers: PaperInput[]): AnalyzerResult {
+export function runGapAnalysisPipeline(papers: PaperInput[], projectName?: string): AnalyzerResult {
   if (!papers || papers.length === 0) {
     return { topics: [], gaps: [], trends: [] };
   }
 
   // ── Stage 1: Domain Classification ────────────────────────
-  const detectedDomains = classifyDomain(papers);
+  // Pass projectName as a domain hint so user-specified domains get priority
+  const detectedDomains = classifyDomain(papers, projectName);
 
   // ── Stage 2: Topic Extraction (domain-grounded) ───────────
   const extractedTopics = extractTopics(papers, detectedDomains);

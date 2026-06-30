@@ -4,6 +4,7 @@ import {
   useListAcademicInsights,
   useCreateAcademicInsight,
   useDeleteAcademicInsight,
+  getListAcademicInsightsQueryKey,
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -120,7 +121,7 @@ export default function AcademicInsightAnalyzer() {
       const result = await createInsight.mutateAsync({ data: payload });
       toast({ title: "Success", description: "Insights generated successfully." });
       // Invalidate query to refetch list
-      queryClient.invalidateQueries({ queryKey: ["/academic-insights"] });
+      queryClient.invalidateQueries({ queryKey: getListAcademicInsightsQueryKey() });
       setSelectedProjectId(result.id.toString());
     } catch (err: any) {
       toast({ title: "Failed to generate insights", description: err.message || "An error occurred.", variant: "destructive" });
@@ -132,7 +133,7 @@ export default function AcademicInsightAnalyzer() {
     try {
       await deleteInsight.mutateAsync({ id });
       toast({ title: "Project deleted", description: "The project has been removed." });
-      queryClient.invalidateQueries({ queryKey: ["/academic-insights"] });
+      queryClient.invalidateQueries({ queryKey: getListAcademicInsightsQueryKey() });
       if (selectedProjectId === id.toString()) {
         setSelectedProjectId("");
       }

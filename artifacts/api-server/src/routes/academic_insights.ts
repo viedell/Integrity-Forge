@@ -27,7 +27,16 @@ router.get("/academic-insights", async (req, res): Promise<void> => {
         .orderBy(academicInsightsTable.createdAt)
     : await db.select().from(academicInsightsTable).orderBy(academicInsightsTable.createdAt);
 
-  res.json(ListAcademicInsightsResponse.parse(serializeDates(rows)));
+  // Fallback for legacy records without rankedConcepts
+  const sanitized = rows.map((row) => {
+    const analysis = row.analysis as any;
+    if (analysis && !analysis.rankedConcepts) {
+      analysis.rankedConcepts = [];
+    }
+    return row;
+  });
+
+  res.json(ListAcademicInsightsResponse.parse(serializeDates(sanitized)));
 });
 
 router.post("/academic-insights", async (req, res): Promise<void> => {
@@ -81,6 +90,12 @@ router.get("/academic-insights/:id", async (req, res): Promise<void> => {
   if (!row) {
     res.status(404).json({ error: "Academic insight not found" });
     return;
+  }
+
+  // Fallback for legacy records without rankedConcepts
+  const analysis = row.analysis as any;
+  if (analysis && !analysis.rankedConcepts) {
+    analysis.rankedConcepts = [];
   }
 
   res.json(GetAcademicInsightResponse.parse(serializeDates(row)));
