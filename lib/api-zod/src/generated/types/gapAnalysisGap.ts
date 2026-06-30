@@ -5,10 +5,18 @@
  * IntegrityForge API — academic integrity analysis platform
  * OpenAPI spec version: 0.1.0
  */
+import type { GapEvidence } from './gapEvidence';
+import type { GapValidationDetail } from './gapValidationDetail';
+import type { MethodologyRecommendation } from './methodologyRecommendation';
 
 export interface GapAnalysisGap {
   title: string;
   description: string;
   papers: string[];
   questions: string[];
+  confidence?: number;
+  categories?: string[];
+  evidence?: GapEvidence;
+  methodologyRecommendation?: MethodologyRecommendation;
+  validation?: GapValidationDetail;
 }

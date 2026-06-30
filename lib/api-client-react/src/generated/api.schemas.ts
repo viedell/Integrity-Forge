@@ -227,11 +227,34 @@ export interface GapAnalysisTopic {
   papers: string[];
 }
 
+export interface GapEvidence {
+  papers: string[];
+  topics: string[];
+  contributions: string[];
+  limitations: string[];
+  reason: string;
+}
+
+export interface MethodologyRecommendation {
+  recommendedMethods: string[];
+  reason: string;
+}
+
+export interface GapValidationDetail {
+  passed: boolean;
+  notes: string[];
+}
+
 export interface GapAnalysisGap {
   title: string;
   description: string;
   papers: string[];
   questions: string[];
+  confidence?: number;
+  categories?: string[];
+  evidence?: GapEvidence;
+  methodologyRecommendation?: MethodologyRecommendation;
+  validation?: GapValidationDetail;
 }
 
 export interface GapAnalysisTrend {
@@ -252,6 +275,17 @@ export interface GapAnalysisCoverage {
   missing: string;
 }
 
+export interface PaperContribution {
+  paperId: string;
+  paperTitle: string;
+  objective: string;
+  contributions: string[];
+  methodology: string;
+  findings: string;
+  explicitLimitations: string[];
+  implicitLimitations: string[];
+}
+
 export interface GapAnalysisReport {
   topics: GapAnalysisTopic[];
   gaps: GapAnalysisGap[];
@@ -259,6 +293,7 @@ export interface GapAnalysisReport {
   detectedDomains?: GapAnalysisDomain[];
   coverageAnalysis?: GapAnalysisCoverage[];
   validationNotes?: string[];
+  contributions?: PaperContribution[];
 }
 
 export interface GapAnalysis {
@@ -283,6 +318,108 @@ export interface CreateGapAnalysisInput {
   /** @minLength 1 */
   projectName: string;
   papers: GapAnalysisPaperInput[];
+}
+
+export type CreateAcademicInsightInputPapersItem = {
+  filename?: string;
+  title: string;
+  abstract: string;
+  year?: number;
+};
+
+export interface CreateAcademicInsightInput {
+  projectName: string;
+  papers: CreateAcademicInsightInputPapersItem[];
+}
+
+export type AcademicInsightPapersItem = {
+  id: string;
+  filename?: string;
+  title: string;
+  abstract: string;
+  year?: number;
+};
+
+export type EvidenceReliabilitySupportingEvidenceItem = {
+  signal: string;
+  sentence: string;
+};
+
+export interface EvidenceReliability {
+  paperId: string;
+  paperTitle: string;
+  score: number;
+  reliabilityLevel: string;
+  supportingEvidence: EvidenceReliabilitySupportingEvidenceItem[];
+  weaknesses: string[];
+  confidence: number;
+  explanation: string;
+}
+
+export interface ClaimNode {
+  id: string;
+  label: string;
+  paperId: string;
+  paperTitle: string;
+}
+
+export type ClaimEdgeType = typeof ClaimEdgeType[keyof typeof ClaimEdgeType];
+
+
+export const ClaimEdgeType = {
+  supports: 'supports',
+  extends: 'extends',
+  contradicts: 'contradicts',
+} as const;
+
+export type ClaimEdgeSemanticType = typeof ClaimEdgeSemanticType[keyof typeof ClaimEdgeSemanticType];
+
+export const ClaimEdgeSemanticType = {
+  supports: 'supports',
+  extends: 'extends',
+  contradicts: 'contradicts',
+  summarizes: 'summarizes',
+  improves: 'improves',
+} as const;
+
+export interface ClaimEdge {
+  sourceClaimId: string;
+  targetClaimId: string;
+  type: ClaimEdgeType;
+  semanticType?: ClaimEdgeSemanticType;
+  confidence?: number;
+  sharedConcepts?: string[];
+  explanation?: string;
+  evidence: string[];
+}
+
+export interface ClaimNetwork {
+  nodes: ClaimNode[];
+  edges: ClaimEdge[];
+}
+
+export interface TimelineEntry {
+  year: number;
+  papers: string[];
+  concepts: string[];
+  methodologies: string[];
+  findings: string[];
+}
+
+export interface AcademicInsightAnalysis {
+  reliability: EvidenceReliability[];
+  claimNetwork: ClaimNetwork;
+  timeline: TimelineEntry[];
+  rankedConcepts: string[];
+}
+
+export interface AcademicInsight {
+  id: number;
+  clerkId?: string;
+  projectName: string;
+  papers: AcademicInsightPapersItem[];
+  analysis: AcademicInsightAnalysis;
+  createdAt: string;
 }
 
 export type ListSubmissionsParams = {

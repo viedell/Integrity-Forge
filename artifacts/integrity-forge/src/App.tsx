@@ -15,7 +15,9 @@ import InstructorTemplates from "@/pages/InstructorTemplates";
 import AdminConsole from "@/pages/AdminConsole";
 import AdminActivity from "@/pages/AdminActivity";
 import AdminUsers from "@/pages/AdminUsers";
+import AcademicInsightAnalyzer from "@/pages/AcademicInsightAnalyzer";
 import NotFound from "@/pages/not-found";
+
 import Onboarding from "@/pages/Onboarding";
 import SignInPage from "@/pages/SignInPage";
 import SignUpPage from "@/pages/SignUpPage";
@@ -167,6 +169,18 @@ function AppRoutes() {
           <Redirect to="/sign-in" />
         </Show>
       </Route>
+
+      <Route path="/student/insights">
+        <Show when="signed-in">
+          <RoleGate role={userRole ?? null} dest="student">
+            <AcademicInsightAnalyzer />
+          </RoleGate>
+        </Show>
+        <Show when="signed-out">
+          <Redirect to="/sign-in" />
+        </Show>
+      </Route>
+
 
       <Route path="/instructor">
         <Show when="signed-in">

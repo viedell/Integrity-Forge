@@ -22,6 +22,9 @@ tags:
     description: Similarity and collusion graph analysis
   - name: stats
     description: Dashboard statistics and activity feeds
+  - name: academic-insights
+    description: Deterministic academic insight evaluation, claim networks, and timeline evolution
+
 
 paths:
   /healthz:
@@ -308,6 +311,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GapAnalysis"
+        "404":
+          description: Not found
+
+  /academic-insights:
+    get:
+      operationId: listAcademicInsights
+      tags: [academic-insights]
+      summary: List all academic insights
+      responses:
+        "200":
+          description: List of academic insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AcademicInsight"
+    post:
+      operationId: createAcademicInsight
+      tags: [academic-insights]
+      summary: Run deterministic academic insights on research papers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAcademicInsightInput"
+      responses:
+        "201":
+          description: Academic insights generated and saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcademicInsight"
+        "400":
+          description: Bad request
+
+  /academic-insights/{id}:
+    get:
+      operationId: getAcademicInsight
+      tags: [academic-insights]
+      summary: Get a specific academic insight report by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Academic insight details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcademicInsight"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteAcademicInsight
+      tags: [academic-insights]
+      summary: Delete a specific academic insight project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcademicInsight"
         "404":
           description: Not found
 
@@ -1022,3 +1099,189 @@ components:
           type: array
           items:
             type: string
+
+    CreateAcademicInsightInput:
+      type: object
+      required: [projectName, papers]
+      properties:
+        projectName:
+          type: string
+        papers:
+          type: array
+          items:
+            type: object
+            required: [title, abstract]
+            properties:
+              filename:
+                type: string
+              title:
+                type: string
+              abstract:
+                type: string
+              year:
+                type: integer
+
+    AcademicInsight:
+      type: object
+      required: [id, projectName, papers, analysis, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        projectName:
+          type: string
+        papers:
+          type: array
+          items:
+            type: object
+            required: [id, title, abstract]
+            properties:
+              id:
+                type: string
+              filename:
+                type: string
+              title:
+                type: string
+              abstract:
+                type: string
+              year:
+                type: integer
+        analysis:
+          $ref: "#/components/schemas/AcademicInsightAnalysis"
+        createdAt:
+          type: string
+
+    AcademicInsightAnalysis:
+      type: object
+      required: [reliability, claimNetwork, timeline, rankedConcepts]
+      properties:
+        reliability:
+          type: array
+          items:
+            $ref: "#/components/schemas/EvidenceReliability"
+        claimNetwork:
+          $ref: "#/components/schemas/ClaimNetwork"
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimelineEntry"
+        rankedConcepts:
+          type: array
+          description: Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score
+          items:
+            type: string
+
+    EvidenceReliability:
+      type: object
+      required: [paperId, paperTitle, score, reliabilityLevel, supportingEvidence, weaknesses, confidence, explanation]
+      properties:
+        paperId:
+          type: string
+        paperTitle:
+          type: string
+        score:
+          type: integer
+        reliabilityLevel:
+          type: string
+        supportingEvidence:
+          type: array
+          items:
+            type: object
+            required: [signal, sentence]
+            properties:
+              signal:
+                type: string
+              sentence:
+                type: string
+        weaknesses:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: integer
+        explanation:
+          type: string
+
+    ClaimNetwork:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClaimNode"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClaimEdge"
+
+    ClaimNode:
+      type: object
+      required: [id, label, paperId, paperTitle]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        paperId:
+          type: string
+        paperTitle:
+          type: string
+
+    ClaimEdge:
+      type: object
+      required: [sourceClaimId, targetClaimId, type, evidence]
+      properties:
+        sourceClaimId:
+          type: string
+        targetClaimId:
+          type: string
+        type:
+          type: string
+          enum: [supports, extends, contradicts]
+        semanticType:
+          type: string
+          enum: [supports, extends, contradicts, summarizes, improves]
+          description: Richer semantic relationship type (a subset of 'type' with more granularity)
+        confidence:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Deterministic confidence score for this edge
+        sharedConcepts:
+          type: array
+          description: Taxonomy-matched scientific concepts shared between the two claims
+          items:
+            type: string
+        explanation:
+          type: string
+          description: Human-readable deterministic explanation of why this relationship was inferred
+        evidence:
+          type: array
+          items:
+            type: string
+
+    TimelineEntry:
+      type: object
+      required: [year, papers, concepts, methodologies, findings]
+      properties:
+        year:
+          type: integer
+        papers:
+          type: array
+          items:
+            type: string
+        concepts:
+          type: array
+          items:
+            type: string
+        methodologies:
+          type: array
+          items:
+            type: string
+        findings:
+          type: array
+          items:
+            type: string
+

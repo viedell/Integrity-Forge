@@ -9,6 +9,7 @@ import statsRouter from "./stats";
 import meRouter from "./me";
 import usersRouter from "./users";
 import gapAnalysesRouter from "./gap_analyses";
+import academicInsightsRouter from "./academic_insights";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,7 @@ router.use(templatesRouter);
 router.use(analysisRouter);
 router.use(statsRouter);
 router.use(gapAnalysesRouter);
+router.use(academicInsightsRouter);
 
 export default router;
+

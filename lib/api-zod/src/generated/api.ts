@@ -241,7 +241,24 @@ export const ListGapAnalysesResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "papers": zod.array(zod.string()),
-  "questions": zod.array(zod.string())
+  "questions": zod.array(zod.string()),
+  "confidence": zod.number().optional(),
+  "categories": zod.array(zod.string()).optional(),
+  "evidence": zod.object({
+  "papers": zod.array(zod.string()),
+  "topics": zod.array(zod.string()),
+  "contributions": zod.array(zod.string()),
+  "limitations": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "methodologyRecommendation": zod.object({
+  "recommendedMethods": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "validation": zod.object({
+  "passed": zod.boolean(),
+  "notes": zod.array(zod.string())
+}).optional()
 })),
   "trends": zod.array(zod.object({
   "name": zod.string(),
@@ -258,7 +275,17 @@ export const ListGapAnalysesResponseItem = zod.object({
   "partial": zod.string(),
   "missing": zod.string()
 })).optional(),
-  "validationNotes": zod.array(zod.string()).optional()
+  "validationNotes": zod.array(zod.string()).optional(),
+  "contributions": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "objective": zod.string(),
+  "contributions": zod.array(zod.string()),
+  "methodology": zod.string(),
+  "findings": zod.string(),
+  "explicitLimitations": zod.array(zod.string()),
+  "implicitLimitations": zod.array(zod.string())
+})).optional()
 }),
   "createdAt": zod.string()
 })
@@ -310,7 +337,24 @@ export const GetGapAnalysisResponse = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "papers": zod.array(zod.string()),
-  "questions": zod.array(zod.string())
+  "questions": zod.array(zod.string()),
+  "confidence": zod.number().optional(),
+  "categories": zod.array(zod.string()).optional(),
+  "evidence": zod.object({
+  "papers": zod.array(zod.string()),
+  "topics": zod.array(zod.string()),
+  "contributions": zod.array(zod.string()),
+  "limitations": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "methodologyRecommendation": zod.object({
+  "recommendedMethods": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "validation": zod.object({
+  "passed": zod.boolean(),
+  "notes": zod.array(zod.string())
+}).optional()
 })),
   "trends": zod.array(zod.object({
   "name": zod.string(),
@@ -327,7 +371,17 @@ export const GetGapAnalysisResponse = zod.object({
   "partial": zod.string(),
   "missing": zod.string()
 })).optional(),
-  "validationNotes": zod.array(zod.string()).optional()
+  "validationNotes": zod.array(zod.string()).optional(),
+  "contributions": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "objective": zod.string(),
+  "contributions": zod.array(zod.string()),
+  "methodology": zod.string(),
+  "findings": zod.string(),
+  "explicitLimitations": zod.array(zod.string()),
+  "implicitLimitations": zod.array(zod.string())
+})).optional()
 }),
   "createdAt": zod.string()
 })
@@ -360,7 +414,24 @@ export const DeleteGapAnalysisResponse = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "papers": zod.array(zod.string()),
-  "questions": zod.array(zod.string())
+  "questions": zod.array(zod.string()),
+  "confidence": zod.number().optional(),
+  "categories": zod.array(zod.string()).optional(),
+  "evidence": zod.object({
+  "papers": zod.array(zod.string()),
+  "topics": zod.array(zod.string()),
+  "contributions": zod.array(zod.string()),
+  "limitations": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "methodologyRecommendation": zod.object({
+  "recommendedMethods": zod.array(zod.string()),
+  "reason": zod.string()
+}).optional(),
+  "validation": zod.object({
+  "passed": zod.boolean(),
+  "notes": zod.array(zod.string())
+}).optional()
 })),
   "trends": zod.array(zod.object({
   "name": zod.string(),
@@ -377,7 +448,202 @@ export const DeleteGapAnalysisResponse = zod.object({
   "partial": zod.string(),
   "missing": zod.string()
 })).optional(),
-  "validationNotes": zod.array(zod.string()).optional()
+  "validationNotes": zod.array(zod.string()).optional(),
+  "contributions": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "objective": zod.string(),
+  "contributions": zod.array(zod.string()),
+  "methodology": zod.string(),
+  "findings": zod.string(),
+  "explicitLimitations": zod.array(zod.string()),
+  "implicitLimitations": zod.array(zod.string())
+})).optional()
+}),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List all academic insights
+ */
+export const ListAcademicInsightsResponseItem = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().optional(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string(),
+  "year": zod.number().optional()
+})),
+  "analysis": zod.object({
+  "reliability": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "score": zod.number(),
+  "reliabilityLevel": zod.string(),
+  "supportingEvidence": zod.array(zod.object({
+  "signal": zod.string(),
+  "sentence": zod.string()
+})),
+  "weaknesses": zod.array(zod.string()),
+  "confidence": zod.number(),
+  "explanation": zod.string()
+})),
+  "claimNetwork": zod.object({
+  "nodes": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "paperId": zod.string(),
+  "paperTitle": zod.string()
+})),
+  "edges": zod.array(zod.object({
+  "sourceClaimId": zod.string(),
+  "targetClaimId": zod.string(),
+  "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "evidence": zod.array(zod.string())
+}))
+}),
+  "timeline": zod.array(zod.object({
+  "year": zod.number(),
+  "papers": zod.array(zod.string()),
+  "concepts": zod.array(zod.string()),
+  "methodologies": zod.array(zod.string()),
+  "findings": zod.array(zod.string())
+}))
+}),
+  "createdAt": zod.string()
+})
+export const ListAcademicInsightsResponse = zod.array(ListAcademicInsightsResponseItem)
+
+
+/**
+ * @summary Run deterministic academic insights on research papers
+ */
+export const CreateAcademicInsightBody = zod.object({
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string(),
+  "year": zod.number().optional()
+}))
+})
+
+
+/**
+ * @summary Get a specific academic insight report by ID
+ */
+export const GetAcademicInsightParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAcademicInsightResponse = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().optional(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string(),
+  "year": zod.number().optional()
+})),
+  "analysis": zod.object({
+  "reliability": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "score": zod.number(),
+  "reliabilityLevel": zod.string(),
+  "supportingEvidence": zod.array(zod.object({
+  "signal": zod.string(),
+  "sentence": zod.string()
+})),
+  "weaknesses": zod.array(zod.string()),
+  "confidence": zod.number(),
+  "explanation": zod.string()
+})),
+  "claimNetwork": zod.object({
+  "nodes": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "paperId": zod.string(),
+  "paperTitle": zod.string()
+})),
+  "edges": zod.array(zod.object({
+  "sourceClaimId": zod.string(),
+  "targetClaimId": zod.string(),
+  "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "evidence": zod.array(zod.string())
+}))
+}),
+  "timeline": zod.array(zod.object({
+  "year": zod.number(),
+  "papers": zod.array(zod.string()),
+  "concepts": zod.array(zod.string()),
+  "methodologies": zod.array(zod.string()),
+  "findings": zod.array(zod.string())
+}))
+}),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a specific academic insight project by ID
+ */
+export const DeleteAcademicInsightParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteAcademicInsightResponse = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().optional(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string(),
+  "year": zod.number().optional()
+})),
+  "analysis": zod.object({
+  "reliability": zod.array(zod.object({
+  "paperId": zod.string(),
+  "paperTitle": zod.string(),
+  "score": zod.number(),
+  "reliabilityLevel": zod.string(),
+  "supportingEvidence": zod.array(zod.object({
+  "signal": zod.string(),
+  "sentence": zod.string()
+})),
+  "weaknesses": zod.array(zod.string()),
+  "confidence": zod.number(),
+  "explanation": zod.string()
+})),
+  "claimNetwork": zod.object({
+  "nodes": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "paperId": zod.string(),
+  "paperTitle": zod.string()
+})),
+  "edges": zod.array(zod.object({
+  "sourceClaimId": zod.string(),
+  "targetClaimId": zod.string(),
+  "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "evidence": zod.array(zod.string())
+}))
+}),
+  "timeline": zod.array(zod.object({
+  "year": zod.number(),
+  "papers": zod.array(zod.string()),
+  "concepts": zod.array(zod.string()),
+  "methodologies": zod.array(zod.string()),
+  "findings": zod.array(zod.string())
+}))
 }),
   "createdAt": zod.string()
 })

@@ -20,9 +20,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AcademicInsight,
   ActivityItem,
   Assignment,
   AssignmentInput,
+  CreateAcademicInsightInput,
   CreateGapAnalysisInput,
   DashboardStats,
   Dispute,
@@ -1105,6 +1107,301 @@ export const useDeleteGapAnalysis = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteGapAnalysisMutationOptions(options));
+    }
+
+export const getListAcademicInsightsUrl = () => {
+
+
+
+
+  return `/api/academic-insights`
+}
+
+/**
+ * @summary List all academic insights
+ */
+export const listAcademicInsights = async ( options?: RequestInit): Promise<AcademicInsight[]> => {
+
+  return customFetch<AcademicInsight[]>(getListAcademicInsightsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAcademicInsightsQueryKey = () => {
+    return [
+    `/api/academic-insights`
+    ] as const;
+    }
+
+
+export const getListAcademicInsightsQueryOptions = <TData = Awaited<ReturnType<typeof listAcademicInsights>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAcademicInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAcademicInsightsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAcademicInsights>>> = ({ signal }) => listAcademicInsights({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAcademicInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAcademicInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof listAcademicInsights>>>
+export type ListAcademicInsightsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all academic insights
+ */
+
+export function useListAcademicInsights<TData = Awaited<ReturnType<typeof listAcademicInsights>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAcademicInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAcademicInsightsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateAcademicInsightUrl = () => {
+
+
+
+
+  return `/api/academic-insights`
+}
+
+/**
+ * @summary Run deterministic academic insights on research papers
+ */
+export const createAcademicInsight = async (createAcademicInsightInput: CreateAcademicInsightInput, options?: RequestInit): Promise<AcademicInsight> => {
+
+  return customFetch<AcademicInsight>(getCreateAcademicInsightUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createAcademicInsightInput,)
+  }
+);}
+
+
+
+
+export const getCreateAcademicInsightMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAcademicInsight>>, TError,{data: BodyType<CreateAcademicInsightInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAcademicInsight>>, TError,{data: BodyType<CreateAcademicInsightInput>}, TContext> => {
+
+const mutationKey = ['createAcademicInsight'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAcademicInsight>>, {data: BodyType<CreateAcademicInsightInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAcademicInsight(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAcademicInsightMutationResult = NonNullable<Awaited<ReturnType<typeof createAcademicInsight>>>
+    export type CreateAcademicInsightMutationBody = BodyType<CreateAcademicInsightInput>
+    export type CreateAcademicInsightMutationError = ErrorType<void>
+
+    /**
+ * @summary Run deterministic academic insights on research papers
+ */
+export const useCreateAcademicInsight = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAcademicInsight>>, TError,{data: BodyType<CreateAcademicInsightInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAcademicInsight>>,
+        TError,
+        {data: BodyType<CreateAcademicInsightInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAcademicInsightMutationOptions(options));
+    }
+
+export const getGetAcademicInsightUrl = (id: number,) => {
+
+
+
+
+  return `/api/academic-insights/${id}`
+}
+
+/**
+ * @summary Get a specific academic insight report by ID
+ */
+export const getAcademicInsight = async (id: number, options?: RequestInit): Promise<AcademicInsight> => {
+
+  return customFetch<AcademicInsight>(getGetAcademicInsightUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAcademicInsightQueryKey = (id: number,) => {
+    return [
+    `/api/academic-insights/${id}`
+    ] as const;
+    }
+
+
+export const getGetAcademicInsightQueryOptions = <TData = Awaited<ReturnType<typeof getAcademicInsight>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAcademicInsight>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAcademicInsightQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAcademicInsight>>> = ({ signal }) => getAcademicInsight(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAcademicInsight>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAcademicInsightQueryResult = NonNullable<Awaited<ReturnType<typeof getAcademicInsight>>>
+export type GetAcademicInsightQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a specific academic insight report by ID
+ */
+
+export function useGetAcademicInsight<TData = Awaited<ReturnType<typeof getAcademicInsight>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAcademicInsight>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAcademicInsightQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDeleteAcademicInsightUrl = (id: number,) => {
+
+
+
+
+  return `/api/academic-insights/${id}`
+}
+
+/**
+ * @summary Delete a specific academic insight project by ID
+ */
+export const deleteAcademicInsight = async (id: number, options?: RequestInit): Promise<AcademicInsight> => {
+
+  return customFetch<AcademicInsight>(getDeleteAcademicInsightUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAcademicInsightMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAcademicInsight>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAcademicInsight>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteAcademicInsight'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAcademicInsight>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteAcademicInsight(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAcademicInsightMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAcademicInsight>>>
+
+    export type DeleteAcademicInsightMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a specific academic insight project by ID
+ */
+export const useDeleteAcademicInsight = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAcademicInsight>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAcademicInsight>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAcademicInsightMutationOptions(options));
     }
 
 export const getListAssignmentsUrl = () => {

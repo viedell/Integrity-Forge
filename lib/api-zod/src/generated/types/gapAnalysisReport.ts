@@ -10,6 +10,7 @@ import type { GapAnalysisDomain } from './gapAnalysisDomain';
 import type { GapAnalysisGap } from './gapAnalysisGap';
 import type { GapAnalysisTopic } from './gapAnalysisTopic';
 import type { GapAnalysisTrend } from './gapAnalysisTrend';
+import type { PaperContribution } from './paperContribution';
 
 export interface GapAnalysisReport {
   topics: GapAnalysisTopic[];
@@ -18,4 +19,5 @@ export interface GapAnalysisReport {
   detectedDomains?: GapAnalysisDomain[];
   coverageAnalysis?: GapAnalysisCoverage[];
   validationNotes?: string[];
+  contributions?: PaperContribution[];
 }

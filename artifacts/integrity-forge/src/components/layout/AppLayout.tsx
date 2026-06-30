@@ -43,6 +43,12 @@ export function AppLayout({ children, title, subtitle, role }: {
                     Research Gap Finder
                   </span>
                 </Link>
+                <Link href="/student/insights">
+                  <span className={`cursor-pointer hover:text-foreground transition-colors ${location.includes("insights") ? "text-foreground" : ""}`}>
+                    Academic Insights
+                  </span>
+                </Link>
+
               </>
             )}
             {role === "instructor" && (
