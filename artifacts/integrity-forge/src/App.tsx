@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import Home from "@/pages/Home";
 import StudentPortal from "@/pages/StudentPortal";
+import ResearchGapFinder from "@/pages/ResearchGapFinder";
 import InstructorDashboard from "@/pages/InstructorDashboard";
 import InstructorTemplates from "@/pages/InstructorTemplates";
 import AdminConsole from "@/pages/AdminConsole";
@@ -149,6 +150,17 @@ function AppRoutes() {
         <Show when="signed-in">
           <RoleGate role={userRole ?? null} dest="student">
             <StudentPortal />
+          </RoleGate>
+        </Show>
+        <Show when="signed-out">
+          <Redirect to="/sign-in" />
+        </Show>
+      </Route>
+
+      <Route path="/student/gap-finder">
+        <Show when="signed-in">
+          <RoleGate role={userRole ?? null} dest="student">
+            <ResearchGapFinder />
           </RoleGate>
         </Show>
         <Show when="signed-out">

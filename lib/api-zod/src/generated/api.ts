@@ -22,7 +22,8 @@ export const HealthCheckResponse = zod.object({
  */
 export const ListSubmissionsQueryParams = zod.object({
   "assignmentId": zod.coerce.number().nullish(),
-  "status": zod.union([zod.literal('clean'),zod.literal('flagged_ai'),zod.literal('flagged_plagiarism'),zod.literal('disputed'),zod.literal('pending'),zod.literal(null)]).nullish()
+  "status": zod.union([zod.literal('clean'),zod.literal('flagged_ai'),zod.literal('flagged_plagiarism'),zod.literal('disputed'),zod.literal('pending'),zod.literal(null)]).nullish(),
+  "includeDeleted": zod.coerce.boolean().nullish()
 })
 
 export const ListSubmissionsResponseItem = zod.object({
@@ -35,7 +36,11 @@ export const ListSubmissionsResponseItem = zod.object({
   "aiScore": zod.number().describe('AI-generated content probability (0-100)'),
   "plagiarismScore": zod.number().describe('Plagiarism similarity score (0-100)'),
   "wordCount": zod.number().nullish(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish(),
+  "deletedBy": zod.string().nullish(),
+  "grade": zod.string().nullish(),
+  "feedback": zod.string().nullish()
 })
 export const ListSubmissionsResponse = zod.array(ListSubmissionsResponseItem)
 
@@ -72,7 +77,11 @@ export const GetSubmissionResponse = zod.object({
   "aiScore": zod.number().describe('AI-generated content probability (0-100)'),
   "plagiarismScore": zod.number().describe('Plagiarism similarity score (0-100)'),
   "wordCount": zod.number().nullish(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish(),
+  "deletedBy": zod.string().nullish(),
+  "grade": zod.string().nullish(),
+  "feedback": zod.string().nullish()
 })
 
 
@@ -86,7 +95,9 @@ export const UpdateSubmissionParams = zod.object({
 export const UpdateSubmissionBody = zod.object({
   "status": zod.enum(['pending', 'clean', 'flagged_ai', 'flagged_plagiarism', 'disputed']).optional(),
   "aiScore": zod.number().optional(),
-  "plagiarismScore": zod.number().optional()
+  "plagiarismScore": zod.number().optional(),
+  "grade": zod.string().optional(),
+  "feedback": zod.string().optional()
 })
 
 export const UpdateSubmissionResponse = zod.object({
@@ -99,7 +110,36 @@ export const UpdateSubmissionResponse = zod.object({
   "aiScore": zod.number().describe('AI-generated content probability (0-100)'),
   "plagiarismScore": zod.number().describe('Plagiarism similarity score (0-100)'),
   "wordCount": zod.number().nullish(),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish(),
+  "deletedBy": zod.string().nullish(),
+  "grade": zod.string().nullish(),
+  "feedback": zod.string().nullish()
+})
+
+
+/**
+ * @summary Soft-delete a submission
+ */
+export const DeleteSubmissionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteSubmissionResponse = zod.object({
+  "id": zod.number(),
+  "assignmentId": zod.number(),
+  "studentName": zod.string(),
+  "studentEmail": zod.string().nullish(),
+  "content": zod.string(),
+  "status": zod.enum(['pending', 'clean', 'flagged_ai', 'flagged_plagiarism', 'disputed']),
+  "aiScore": zod.number().describe('AI-generated content probability (0-100)'),
+  "plagiarismScore": zod.number().describe('Plagiarism similarity score (0-100)'),
+  "wordCount": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish(),
+  "deletedBy": zod.string().nullish(),
+  "grade": zod.string().nullish(),
+  "feedback": zod.string().nullish()
 })
 
 
@@ -174,6 +214,171 @@ export const UpdateDisputeResponse = zod.object({
   "rationale": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),
   "instructorNote": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List all gap analyses
+ */
+export const ListGapAnalysesResponseItem = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().nullish(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string()
+})),
+  "analysis": zod.object({
+  "topics": zod.array(zod.object({
+  "name": zod.string(),
+  "count": zod.number(),
+  "papers": zod.array(zod.string())
+})),
+  "gaps": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "papers": zod.array(zod.string()),
+  "questions": zod.array(zod.string())
+})),
+  "trends": zod.array(zod.object({
+  "name": zod.string(),
+  "score": zod.number()
+})),
+  "detectedDomains": zod.array(zod.object({
+  "domainKey": zod.string(),
+  "displayName": zod.string(),
+  "confidence": zod.number()
+})).optional(),
+  "coverageAnalysis": zod.array(zod.object({
+  "topic": zod.string(),
+  "covered": zod.string(),
+  "partial": zod.string(),
+  "missing": zod.string()
+})).optional(),
+  "validationNotes": zod.array(zod.string()).optional()
+}),
+  "createdAt": zod.string()
+})
+export const ListGapAnalysesResponse = zod.array(ListGapAnalysesResponseItem)
+
+
+/**
+ * @summary Run NLP analysis on research papers to find gaps
+ */
+
+
+
+
+
+export const CreateGapAnalysisBody = zod.object({
+  "projectName": zod.string().min(1),
+  "papers": zod.array(zod.object({
+  "filename": zod.string().optional(),
+  "title": zod.string().min(1),
+  "abstract": zod.string().min(1)
+}))
+})
+
+
+/**
+ * @summary Get a specific gap analysis report by ID
+ */
+export const GetGapAnalysisParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetGapAnalysisResponse = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().nullish(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string()
+})),
+  "analysis": zod.object({
+  "topics": zod.array(zod.object({
+  "name": zod.string(),
+  "count": zod.number(),
+  "papers": zod.array(zod.string())
+})),
+  "gaps": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "papers": zod.array(zod.string()),
+  "questions": zod.array(zod.string())
+})),
+  "trends": zod.array(zod.object({
+  "name": zod.string(),
+  "score": zod.number()
+})),
+  "detectedDomains": zod.array(zod.object({
+  "domainKey": zod.string(),
+  "displayName": zod.string(),
+  "confidence": zod.number()
+})).optional(),
+  "coverageAnalysis": zod.array(zod.object({
+  "topic": zod.string(),
+  "covered": zod.string(),
+  "partial": zod.string(),
+  "missing": zod.string()
+})).optional(),
+  "validationNotes": zod.array(zod.string()).optional()
+}),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a specific gap analysis project by ID
+ */
+export const DeleteGapAnalysisParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteGapAnalysisResponse = zod.object({
+  "id": zod.number(),
+  "clerkId": zod.string().nullish(),
+  "projectName": zod.string(),
+  "papers": zod.array(zod.object({
+  "id": zod.string(),
+  "filename": zod.string().optional(),
+  "title": zod.string(),
+  "abstract": zod.string()
+})),
+  "analysis": zod.object({
+  "topics": zod.array(zod.object({
+  "name": zod.string(),
+  "count": zod.number(),
+  "papers": zod.array(zod.string())
+})),
+  "gaps": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "papers": zod.array(zod.string()),
+  "questions": zod.array(zod.string())
+})),
+  "trends": zod.array(zod.object({
+  "name": zod.string(),
+  "score": zod.number()
+})),
+  "detectedDomains": zod.array(zod.object({
+  "domainKey": zod.string(),
+  "displayName": zod.string(),
+  "confidence": zod.number()
+})).optional(),
+  "coverageAnalysis": zod.array(zod.object({
+  "topic": zod.string(),
+  "covered": zod.string(),
+  "partial": zod.string(),
+  "missing": zod.string()
+})).optional(),
+  "validationNotes": zod.array(zod.string()).optional()
+}),
   "createdAt": zod.string()
 })
 

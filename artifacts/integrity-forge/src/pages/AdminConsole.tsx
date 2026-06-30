@@ -1,14 +1,14 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useGetDashboardStats, useListActivity, useListSubmissions, useListAssignments } from "@workspace/api-client-react";
+import { useGetDashboardStats, useListActivity, useListSubmissions, useListAssignments, Submission, Assignment } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ActivityItemType } from "@workspace/api-client-react/src/generated/api.schemas";
+import { ActivityItemType } from "@workspace/api-client-react";
 import { Shield, FileText, CheckCircle, AlertTriangle, Scale, Activity, Download } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-function exportCsv(submissions: ReturnType<typeof useListSubmissions>["data"], assignments: ReturnType<typeof useListAssignments>["data"]) {
+function exportCsv(submissions: Submission[] | undefined, assignments: Assignment[] | undefined) {
   const rows = (submissions ?? []).map(sub => {
     const assignment = (assignments ?? []).find(a => a.id === sub.assignmentId);
     return [

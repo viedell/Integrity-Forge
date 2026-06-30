@@ -8,6 +8,7 @@ import analysisRouter from "./analysis";
 import statsRouter from "./stats";
 import meRouter from "./me";
 import usersRouter from "./users";
+import gapAnalysesRouter from "./gap_analyses";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(disputesRouter);
 router.use(templatesRouter);
 router.use(analysisRouter);
 router.use(statsRouter);
+router.use(gapAnalysesRouter);
 
 export default router;

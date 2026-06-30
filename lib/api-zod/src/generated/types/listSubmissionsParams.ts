@@ -16,4 +16,8 @@ assignmentId?: number | null;
  * @nullable
  */
 status?: ListSubmissionsStatus;
+/**
+ * @nullable
+ */
+includeDeleted?: boolean | null;
 };

@@ -23,10 +23,12 @@ import type {
   ActivityItem,
   Assignment,
   AssignmentInput,
+  CreateGapAnalysisInput,
   DashboardStats,
   Dispute,
   DisputeInput,
   DisputeUpdate,
+  GapAnalysis,
   GetSimilarityGraphParams,
   HealthStatus,
   ListActivityParams,
@@ -436,6 +438,76 @@ export const useUpdateSubmission = <TError = ErrorType<void>,
       return useMutation(getUpdateSubmissionMutationOptions(options));
     }
 
+export const getDeleteSubmissionUrl = (id: number,) => {
+
+
+
+
+  return `/api/submissions/${id}`
+}
+
+/**
+ * @summary Soft-delete a submission
+ */
+export const deleteSubmission = async (id: number, options?: RequestInit): Promise<Submission> => {
+
+  return customFetch<Submission>(getDeleteSubmissionUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSubmissionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSubmission>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSubmission>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSubmission'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSubmission>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSubmission(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSubmissionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSubmission>>>
+
+    export type DeleteSubmissionMutationError = ErrorType<void>
+
+    /**
+ * @summary Soft-delete a submission
+ */
+export const useDeleteSubmission = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSubmission>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSubmission>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSubmissionMutationOptions(options));
+    }
+
 export const getListDisputesUrl = (params?: ListDisputesParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -738,6 +810,301 @@ export const useUpdateDispute = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateDisputeMutationOptions(options));
+    }
+
+export const getListGapAnalysesUrl = () => {
+
+
+
+
+  return `/api/gap-analyses`
+}
+
+/**
+ * @summary List all gap analyses
+ */
+export const listGapAnalyses = async ( options?: RequestInit): Promise<GapAnalysis[]> => {
+
+  return customFetch<GapAnalysis[]>(getListGapAnalysesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListGapAnalysesQueryKey = () => {
+    return [
+    `/api/gap-analyses`
+    ] as const;
+    }
+
+
+export const getListGapAnalysesQueryOptions = <TData = Awaited<ReturnType<typeof listGapAnalyses>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGapAnalyses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGapAnalysesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGapAnalyses>>> = ({ signal }) => listGapAnalyses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGapAnalyses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListGapAnalysesQueryResult = NonNullable<Awaited<ReturnType<typeof listGapAnalyses>>>
+export type ListGapAnalysesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all gap analyses
+ */
+
+export function useListGapAnalyses<TData = Awaited<ReturnType<typeof listGapAnalyses>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGapAnalyses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListGapAnalysesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateGapAnalysisUrl = () => {
+
+
+
+
+  return `/api/gap-analyses`
+}
+
+/**
+ * @summary Run NLP analysis on research papers to find gaps
+ */
+export const createGapAnalysis = async (createGapAnalysisInput: CreateGapAnalysisInput, options?: RequestInit): Promise<GapAnalysis> => {
+
+  return customFetch<GapAnalysis>(getCreateGapAnalysisUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createGapAnalysisInput,)
+  }
+);}
+
+
+
+
+export const getCreateGapAnalysisMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGapAnalysis>>, TError,{data: BodyType<CreateGapAnalysisInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createGapAnalysis>>, TError,{data: BodyType<CreateGapAnalysisInput>}, TContext> => {
+
+const mutationKey = ['createGapAnalysis'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGapAnalysis>>, {data: BodyType<CreateGapAnalysisInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createGapAnalysis(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGapAnalysisMutationResult = NonNullable<Awaited<ReturnType<typeof createGapAnalysis>>>
+    export type CreateGapAnalysisMutationBody = BodyType<CreateGapAnalysisInput>
+    export type CreateGapAnalysisMutationError = ErrorType<void>
+
+    /**
+ * @summary Run NLP analysis on research papers to find gaps
+ */
+export const useCreateGapAnalysis = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGapAnalysis>>, TError,{data: BodyType<CreateGapAnalysisInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createGapAnalysis>>,
+        TError,
+        {data: BodyType<CreateGapAnalysisInput>},
+        TContext
+      > => {
+      return useMutation(getCreateGapAnalysisMutationOptions(options));
+    }
+
+export const getGetGapAnalysisUrl = (id: number,) => {
+
+
+
+
+  return `/api/gap-analyses/${id}`
+}
+
+/**
+ * @summary Get a specific gap analysis report by ID
+ */
+export const getGapAnalysis = async (id: number, options?: RequestInit): Promise<GapAnalysis> => {
+
+  return customFetch<GapAnalysis>(getGetGapAnalysisUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetGapAnalysisQueryKey = (id: number,) => {
+    return [
+    `/api/gap-analyses/${id}`
+    ] as const;
+    }
+
+
+export const getGetGapAnalysisQueryOptions = <TData = Awaited<ReturnType<typeof getGapAnalysis>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGapAnalysis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetGapAnalysisQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getGapAnalysis>>> = ({ signal }) => getGapAnalysis(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getGapAnalysis>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetGapAnalysisQueryResult = NonNullable<Awaited<ReturnType<typeof getGapAnalysis>>>
+export type GetGapAnalysisQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a specific gap analysis report by ID
+ */
+
+export function useGetGapAnalysis<TData = Awaited<ReturnType<typeof getGapAnalysis>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getGapAnalysis>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetGapAnalysisQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDeleteGapAnalysisUrl = (id: number,) => {
+
+
+
+
+  return `/api/gap-analyses/${id}`
+}
+
+/**
+ * @summary Delete a specific gap analysis project by ID
+ */
+export const deleteGapAnalysis = async (id: number, options?: RequestInit): Promise<GapAnalysis> => {
+
+  return customFetch<GapAnalysis>(getDeleteGapAnalysisUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteGapAnalysisMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteGapAnalysis>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteGapAnalysis>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteGapAnalysis'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteGapAnalysis>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteGapAnalysis(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteGapAnalysisMutationResult = NonNullable<Awaited<ReturnType<typeof deleteGapAnalysis>>>
+
+    export type DeleteGapAnalysisMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a specific gap analysis project by ID
+ */
+export const useDeleteGapAnalysis = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteGapAnalysis>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteGapAnalysis>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteGapAnalysisMutationOptions(options));
     }
 
 export const getListAssignmentsUrl = () => {

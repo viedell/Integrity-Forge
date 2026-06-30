@@ -53,6 +53,10 @@ paths:
           schema:
             type: ["string", "null"]
             enum: [clean, flagged_ai, flagged_plagiarism, disputed, pending, null]
+        - name: includeDeleted
+          in: query
+          schema:
+            type: ["boolean", "null"]
       responses:
         "200":
           description: List of submissions
@@ -121,6 +125,25 @@ paths:
       responses:
         "200":
           description: Updated submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSubmission
+      tags: [submissions]
+      summary: Soft-delete a submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Submission deleted
           content:
             application/json:
               schema:
@@ -211,6 +234,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Dispute"
+        "404":
+          description: Not found
+
+  /gap-analyses:
+    get:
+      operationId: listGapAnalyses
+      tags: [gap-analyses]
+      summary: List all gap analyses
+      responses:
+        "200":
+          description: List of gap analyses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GapAnalysis"
+    post:
+      operationId: createGapAnalysis
+      tags: [gap-analyses]
+      summary: Run NLP analysis on research papers to find gaps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGapAnalysisInput"
+      responses:
+        "201":
+          description: Analysis generated and saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GapAnalysis"
+        "400":
+          description: Bad request
+
+  /gap-analyses/{id}:
+    get:
+      operationId: getGapAnalysis
+      tags: [gap-analyses]
+      summary: Get a specific gap analysis report by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Gap analysis details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GapAnalysis"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteGapAnalysis
+      tags: [gap-analyses]
+      summary: Delete a specific gap analysis project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GapAnalysis"
         "404":
           description: Not found
 
@@ -451,6 +548,14 @@ components:
           type: ["integer", "null"]
         createdAt:
           type: string
+        deletedAt:
+          type: ["string", "null"]
+        deletedBy:
+          type: ["string", "null"]
+        grade:
+          type: ["string", "null"]
+        feedback:
+          type: ["string", "null"]
 
     SubmissionInput:
       type: object
@@ -477,6 +582,10 @@ components:
           type: number
         plagiarismScore:
           type: number
+        grade:
+          type: string
+        feedback:
+          type: string
 
     Dispute:
       type: object
@@ -676,3 +785,240 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
+
+    GapAnalysis:
+      type: object
+      required: [id, projectName, papers, analysis, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: ["string", "null"]
+        projectName:
+          type: string
+        papers:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisPaper"
+        analysis:
+          $ref: "#/components/schemas/GapAnalysisReport"
+        createdAt:
+          type: string
+
+    GapAnalysisPaper:
+      type: object
+      required: [id, title, abstract]
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        title:
+          type: string
+        abstract:
+          type: string
+
+    CreateGapAnalysisInput:
+      type: object
+      required: [projectName, papers]
+      properties:
+        projectName:
+          type: string
+          minLength: 1
+        papers:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisPaperInput"
+
+    GapAnalysisPaperInput:
+      type: object
+      required: [title, abstract]
+      properties:
+        filename:
+          type: string
+        title:
+          type: string
+          minLength: 1
+        abstract:
+          type: string
+          minLength: 1
+
+    GapAnalysisReport:
+      type: object
+      required: [topics, gaps, trends]
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisTopic"
+        gaps:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisGap"
+        trends:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisTrend"
+        detectedDomains:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisDomain"
+        coverageAnalysis:
+          type: array
+          items:
+            $ref: "#/components/schemas/GapAnalysisCoverage"
+        validationNotes:
+          type: array
+          items:
+            type: string
+        contributions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaperContribution"
+
+    GapAnalysisTopic:
+      type: object
+      required: [name, count, papers]
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+        papers:
+          type: array
+          items:
+            type: string
+
+    GapAnalysisGap:
+      type: object
+      required: [title, description, papers, questions]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        papers:
+          type: array
+          items:
+            type: string
+        questions:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: number
+        categories:
+          type: array
+          items:
+            type: string
+        evidence:
+          $ref: "#/components/schemas/GapEvidence"
+        methodologyRecommendation:
+          $ref: "#/components/schemas/MethodologyRecommendation"
+        validation:
+          $ref: "#/components/schemas/GapValidationDetail"
+
+    GapAnalysisTrend:
+      type: object
+      required: [name, score]
+      properties:
+        name:
+          type: string
+        score:
+          type: number
+
+    GapAnalysisDomain:
+      type: object
+      required: [domainKey, displayName, confidence]
+      properties:
+        domainKey:
+          type: string
+        displayName:
+          type: string
+        confidence:
+          type: number
+
+    GapAnalysisCoverage:
+      type: object
+      required: [topic, covered, partial, missing]
+      properties:
+        topic:
+          type: string
+        covered:
+          type: string
+        partial:
+          type: string
+        missing:
+          type: string
+
+    PaperContribution:
+      type: object
+      required: [paperId, paperTitle, objective, contributions, methodology, findings, explicitLimitations, implicitLimitations]
+      properties:
+        paperId:
+          type: string
+        paperTitle:
+          type: string
+        objective:
+          type: string
+        contributions:
+          type: array
+          items:
+            type: string
+        methodology:
+          type: string
+        findings:
+          type: string
+        explicitLimitations:
+          type: array
+          items:
+            type: string
+        implicitLimitations:
+          type: array
+          items:
+            type: string
+
+    GapEvidence:
+      type: object
+      required: [papers, topics, contributions, limitations, reason]
+      properties:
+        papers:
+          type: array
+          items:
+            type: string
+        topics:
+          type: array
+          items:
+            type: string
+        contributions:
+          type: array
+          items:
+            type: string
+        limitations:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+
+    MethodologyRecommendation:
+      type: object
+      required: [recommendedMethods, reason]
+      properties:
+        recommendedMethods:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+
+    GapValidationDetail:
+      type: object
+      required: [passed, notes]
+      properties:
+        passed:
+          type: boolean
+        notes:
+          type: array
+          items:
+            type: string

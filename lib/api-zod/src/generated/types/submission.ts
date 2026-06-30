@@ -22,4 +22,12 @@ export interface Submission {
   /** @nullable */
   wordCount?: number | null;
   createdAt: string;
+  /** @nullable */
+  deletedAt?: string | null;
+  /** @nullable */
+  deletedBy?: string | null;
+  /** @nullable */
+  grade?: string | null;
+  /** @nullable */
+  feedback?: string | null;
 }

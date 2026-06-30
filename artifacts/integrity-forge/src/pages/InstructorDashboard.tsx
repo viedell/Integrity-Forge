@@ -10,9 +10,12 @@ import {
   useCreateTemplate,
   useDeleteTemplate,
   useCreateAssignment,
+  useDeleteSubmission,
+  useUpdateSubmission,
   getListDisputesQueryKey,
   getListTemplatesQueryKey,
   getListAssignmentsQueryKey,
+  getListSubmissionsQueryKey,
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,19 +29,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Trash2, Upload, Plus } from "lucide-react";
+import { FileText, Trash2, Upload, Plus, Eye } from "lucide-react";
 
 export default function InstructorDashboard() {
   const { data: assignments = [], isLoading: loadingAssignments } = useListAssignments();
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
 
-  const { data: submissions = [], isLoading: loadingSubmissions } = useListSubmissions({ 
-    assignmentId: selectedAssignmentId ? parseInt(selectedAssignmentId) : undefined 
-  }, { query: { enabled: !!selectedAssignmentId } });
+  const { data: allSubmissions = [], isLoading: loadingSubmissions } = useListSubmissions({ 
+    assignmentId: selectedAssignmentId ? parseInt(selectedAssignmentId) : undefined,
+    includeDeleted: true
+  }, { query: { enabled: !!selectedAssignmentId } as any });
+
+  const submissions = allSubmissions.filter(sub => sub.deletedAt == null);
+  const deletedSubmissions = allSubmissions.filter(sub => sub.deletedAt != null);
+
+  const deleteSubmission = useDeleteSubmission();
+  const updateSubmission = useUpdateSubmission();
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [previewStudent, setPreviewStudent] = useState<string>("");
+
+  const [gradingSubmissionId, setGradingSubmissionId] = useState<number | null>(null);
+  const [gradingGrade, setGradingGrade] = useState("");
+  const [gradingFeedback, setGradingFeedback] = useState("");
+  const [gradingStudent, setGradingStudent] = useState("");
 
   const { data: graphData = { nodes: [], edges: [] }, isLoading: loadingGraph } = useGetSimilarityGraph({ 
     assignmentId: selectedAssignmentId ? parseInt(selectedAssignmentId) : undefined 
-  }, { query: { enabled: !!selectedAssignmentId } });
+  }, { query: { enabled: !!selectedAssignmentId } as any });
 
   const { data: disputes = [], isLoading: loadingDisputes } = useListDisputes({ status: 'pending' });
   const updateDispute = useUpdateDispute();
@@ -62,6 +79,41 @@ export default function InstructorDashboard() {
   // Template Form State
   const [templateFilename, setTemplateFilename] = useState("");
   const [templateContent, setTemplateContent] = useState("");
+
+  const handleDeleteSubmission = (id: number) => {
+    if (!confirm("Are you sure you want to remove this paper?")) return;
+    deleteSubmission.mutate({ id }, {
+      onSuccess: () => {
+        toast({ title: "Paper removed", description: "The submission has been soft-deleted." });
+        queryClient.invalidateQueries({ queryKey: getListSubmissionsQueryKey() });
+      },
+      onError: () => toast({ title: "Error", description: "Failed to remove submission.", variant: "destructive" }),
+    });
+  };
+
+  const handleGradeSubmission = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!gradingSubmissionId) return;
+
+    updateSubmission.mutate({
+      id: gradingSubmissionId,
+      data: {
+        grade: gradingGrade,
+        feedback: gradingFeedback,
+      }
+    }, {
+      onSuccess: () => {
+        toast({ title: "Submission graded", description: `Grade and feedback saved for ${gradingStudent}.` });
+        setGradingSubmissionId(null);
+        setGradingGrade("");
+        setGradingFeedback("");
+        queryClient.invalidateQueries({ queryKey: getListSubmissionsQueryKey() });
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to grade submission.", variant: "destructive" });
+      }
+    });
+  };
 
   const handleCreateAssignment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,6 +248,12 @@ export default function InstructorDashboard() {
           <TabsTrigger value="overview" disabled={!selectedAssignmentId}>Assignment Overview</TabsTrigger>
           <TabsTrigger value="graph" disabled={!selectedAssignmentId}>Collusion Graph</TabsTrigger>
           <TabsTrigger value="templates" disabled={!selectedAssignmentId}>Templates</TabsTrigger>
+          <TabsTrigger value="removed" disabled={!selectedAssignmentId}>
+            Removed Papers
+            {deletedSubmissions.length > 0 && (
+              <Badge variant="outline" className="ml-2 px-1.5 py-0.5 text-[10px] bg-secondary/80 text-foreground">{deletedSubmissions.length}</Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="disputes">
             Pending Disputes 
             {disputes.length > 0 && (
@@ -252,6 +310,12 @@ export default function InstructorDashboard() {
                             <p className="text-sm text-muted-foreground font-mono">{sub.studentEmail}</p>
                           </div>
                           <div className="flex items-center gap-4">
+                            {sub.grade && (
+                              <div className="text-right border-r pr-4 border-border">
+                                <p className="text-xs text-muted-foreground">Grade</p>
+                                <p className="font-bold text-primary font-mono">{sub.grade}</p>
+                              </div>
+                            )}
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">AI Score</p>
                               <p className={`font-mono ${sub.aiScore > 70 ? 'text-destructive font-bold' : ''}`}>{sub.aiScore}%</p>
@@ -263,6 +327,44 @@ export default function InstructorDashboard() {
                             <Badge variant={sub.status === 'clean' ? 'outline' : sub.status.includes('flagged') ? 'destructive' : 'secondary'}>
                               {sub.status.replace('_', ' ').toUpperCase()}
                             </Badge>
+                            
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8"
+                                onClick={() => {
+                                  setGradingSubmissionId(sub.id);
+                                  setGradingGrade(sub.grade || "");
+                                  setGradingFeedback(sub.feedback || "");
+                                  setGradingStudent(sub.studentName);
+                                }}
+                              >
+                                Grade
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                title="Preview submission text"
+                                onClick={() => {
+                                  setPreviewContent(sub.content);
+                                  setPreviewStudent(sub.studentName);
+                                }}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                title="Remove paper"
+                                onClick={() => handleDeleteSubmission(sub.id)}
+                                disabled={deleteSubmission.isPending}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -433,7 +535,130 @@ export default function InstructorDashboard() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="removed" className="space-y-6">
+          {selectedAssignmentId ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Removed Submissions</CardTitle>
+                <CardDescription>
+                  Submissions that have been soft-deleted by students or instructors. Student-deleted submissions are cached here for verification.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingSubmissions ? (
+                  <div className="space-y-2">
+                    <div className="h-10 bg-secondary/50 rounded animate-pulse"></div>
+                    <div className="h-10 bg-secondary/50 rounded animate-pulse"></div>
+                  </div>
+                ) : deletedSubmissions.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No removed submissions for this assignment.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {deletedSubmissions.map(sub => (
+                      <div key={sub.id} className="flex items-center justify-between p-4 border border-dashed rounded-md bg-secondary/10">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-muted-foreground line-through">{sub.studentName}</p>
+                            <Badge variant="outline" className="text-[10px] capitalize">
+                              Removed by {sub.deletedBy || 'student'}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground font-mono">{sub.studentEmail}</p>
+                          {sub.deletedAt && (
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              Removed on {new Date(sub.deletedAt).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right text-muted-foreground">
+                            <p className="text-xs">AI Score</p>
+                            <p className="font-mono">{sub.aiScore}%</p>
+                          </div>
+                          <div className="text-right text-muted-foreground">
+                            <p className="text-xs">Plagiarism</p>
+                            <p className="font-mono">{sub.plagiarismScore}%</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setPreviewContent(sub.content);
+                              setPreviewStudent(sub.studentName);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={previewContent !== null} onOpenChange={(open) => !open && setPreviewContent(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Submission Preview</DialogTitle>
+            <DialogDescription>
+              Viewing submission text for {previewStudent}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto min-h-[300px] p-4 bg-secondary/30 rounded border border-border mt-4">
+            <pre className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
+              {previewContent}
+            </pre>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button onClick={() => setPreviewContent(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={gradingSubmissionId !== null} onOpenChange={(open) => !open && setGradingSubmissionId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Grade Submission</DialogTitle>
+            <DialogDescription>
+              Assign a grade and feedback for {gradingStudent}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleGradeSubmission} className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="grade">Grade</Label>
+              <Input
+                id="grade"
+                value={gradingGrade}
+                onChange={e => setGradingGrade(e.target.value)}
+                placeholder="e.g. A, B+, 92/100"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feedback">Feedback</Label>
+              <Textarea
+                id="feedback"
+                value={gradingFeedback}
+                onChange={e => setGradingFeedback(e.target.value)}
+                placeholder="Write student feedback here..."
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setGradingSubmissionId(null)}>Cancel</Button>
+              <Button type="submit" disabled={updateSubmission.isPending}>
+                {updateSubmission.isPending ? "Saving..." : "Save Grade"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

@@ -14,6 +14,10 @@ export const submissionsTable = pgTable("submissions", {
   plagiarismScore: real("plagiarism_score").notNull().default(0),
   wordCount: integer("word_count"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  deletedBy: text("deleted_by"), // 'student' | 'instructor'
+  grade: text("grade"),
+  feedback: text("feedback"),
 });
 
 export const insertSubmissionSchema = createInsertSchema(submissionsTable).omit({

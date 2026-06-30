@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { getAuth } from "@clerk/express";
 import { db, usersTable } from "@workspace/db";
@@ -7,7 +7,7 @@ import { serializeDates } from "../lib/serialize";
 
 const router: ReturnType<typeof Router> = Router();
 
-async function requireAdmin(req: Parameters<Parameters<typeof router.use>[0]>[0], res: Parameters<Parameters<typeof router.use>[0]>[1]): Promise<boolean> {
+async function requireAdmin(req: Request, res: Response): Promise<boolean> {
   const auth = getAuth(req);
   if (!auth?.userId) {
     res.status(401).json({ error: "Unauthorized" });

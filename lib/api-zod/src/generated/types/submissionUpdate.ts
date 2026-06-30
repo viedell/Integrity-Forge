@@ -11,4 +11,6 @@ export interface SubmissionUpdate {
   status?: SubmissionUpdateStatus;
   aiScore?: number;
   plagiarismScore?: number;
+  grade?: string;
+  feedback?: string;
 }

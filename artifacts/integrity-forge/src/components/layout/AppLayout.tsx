@@ -32,11 +32,18 @@ export function AppLayout({ children, title, subtitle, role }: {
 
           <nav className="flex items-center gap-5 text-sm font-medium text-muted-foreground">
             {role === "student" && (
-              <Link href="/student">
-                <span className={`cursor-pointer hover:text-foreground transition-colors ${location === "/student" ? "text-foreground" : ""}`}>
-                  My Submissions
-                </span>
-              </Link>
+              <>
+                <Link href="/student">
+                  <span className={`cursor-pointer hover:text-foreground transition-colors ${location === "/student" ? "text-foreground" : ""}`}>
+                    My Submissions
+                  </span>
+                </Link>
+                <Link href="/student/gap-finder">
+                  <span className={`cursor-pointer hover:text-foreground transition-colors ${location.includes("gap-finder") ? "text-foreground" : ""}`}>
+                    Research Gap Finder
+                  </span>
+                </Link>
+              </>
             )}
             {role === "instructor" && (
               <>

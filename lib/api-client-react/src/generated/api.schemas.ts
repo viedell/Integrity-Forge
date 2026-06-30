@@ -35,6 +35,14 @@ export interface Submission {
   /** @nullable */
   wordCount?: number | null;
   createdAt: string;
+  /** @nullable */
+  deletedAt?: string | null;
+  /** @nullable */
+  deletedBy?: string | null;
+  /** @nullable */
+  grade?: string | null;
+  /** @nullable */
+  feedback?: string | null;
 }
 
 export interface SubmissionInput {
@@ -61,6 +69,8 @@ export interface SubmissionUpdate {
   status?: SubmissionUpdateStatus;
   aiScore?: number;
   plagiarismScore?: number;
+  grade?: string;
+  feedback?: string;
 }
 
 export type DisputeStatus = typeof DisputeStatus[keyof typeof DisputeStatus];
@@ -204,6 +214,77 @@ export interface ActivityItem {
   createdAt: string;
 }
 
+export interface GapAnalysisPaper {
+  id: string;
+  filename?: string;
+  title: string;
+  abstract: string;
+}
+
+export interface GapAnalysisTopic {
+  name: string;
+  count: number;
+  papers: string[];
+}
+
+export interface GapAnalysisGap {
+  title: string;
+  description: string;
+  papers: string[];
+  questions: string[];
+}
+
+export interface GapAnalysisTrend {
+  name: string;
+  score: number;
+}
+
+export interface GapAnalysisDomain {
+  domainKey: string;
+  displayName: string;
+  confidence: number;
+}
+
+export interface GapAnalysisCoverage {
+  topic: string;
+  covered: string;
+  partial: string;
+  missing: string;
+}
+
+export interface GapAnalysisReport {
+  topics: GapAnalysisTopic[];
+  gaps: GapAnalysisGap[];
+  trends: GapAnalysisTrend[];
+  detectedDomains?: GapAnalysisDomain[];
+  coverageAnalysis?: GapAnalysisCoverage[];
+  validationNotes?: string[];
+}
+
+export interface GapAnalysis {
+  id: number;
+  /** @nullable */
+  clerkId?: string | null;
+  projectName: string;
+  papers: GapAnalysisPaper[];
+  analysis: GapAnalysisReport;
+  createdAt: string;
+}
+
+export interface GapAnalysisPaperInput {
+  filename?: string;
+  /** @minLength 1 */
+  title: string;
+  /** @minLength 1 */
+  abstract: string;
+}
+
+export interface CreateGapAnalysisInput {
+  /** @minLength 1 */
+  projectName: string;
+  papers: GapAnalysisPaperInput[];
+}
+
 export type ListSubmissionsParams = {
 /**
  * @nullable
@@ -213,6 +294,10 @@ assignmentId?: number | null;
  * @nullable
  */
 status?: ListSubmissionsStatus;
+/**
+ * @nullable
+ */
+includeDeleted?: boolean | null;
 };
 
 export type ListSubmissionsStatus = typeof ListSubmissionsStatus[keyof typeof ListSubmissionsStatus] | null;

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { SimilarityNode, SimilarityEdge } from "@workspace/api-client-react/src/generated/api.schemas";
+import { SimilarityNode, SimilarityEdge } from "@workspace/api-client-react";
 
 interface CollusionGraphProps {
   nodes: SimilarityNode[];

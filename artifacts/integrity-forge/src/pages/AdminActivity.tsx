@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useListActivity } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ActivityItemType } from "@workspace/api-client-react/src/generated/api.schemas";
+import { ActivityItemType } from "@workspace/api-client-react";
 import { Shield, FileText, CheckCircle, Scale, Activity, Clock } from "lucide-react";
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string; color: string }> = {

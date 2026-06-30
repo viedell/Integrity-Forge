@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, and, SQL, gte } from "drizzle-orm";
+import { eq, and, SQL, gte, isNull } from "drizzle-orm";
 import { db, submissionsTable, similarityEdgesTable } from "@workspace/db";
 import { serializeDates } from "../lib/serialize";
 import {
@@ -20,10 +20,10 @@ router.get("/similarity-graph", async (req, res): Promise<void> => {
   const { assignmentId, threshold } = params.data;
   const minScore = threshold ?? 30;
 
-  // Get relevant submissions
+  // Get relevant submissions that are not deleted
   const submissionRows = assignmentId != null
-    ? await db.select().from(submissionsTable).where(eq(submissionsTable.assignmentId, assignmentId))
-    : await db.select().from(submissionsTable);
+    ? await db.select().from(submissionsTable).where(and(eq(submissionsTable.assignmentId, assignmentId), isNull(submissionsTable.deletedAt)))
+    : await db.select().from(submissionsTable).where(isNull(submissionsTable.deletedAt));
 
   const submissionIds = new Set(submissionRows.map((s) => s.id));
 
