@@ -10,6 +10,7 @@ import {
   useCreateTemplate,
   useDeleteTemplate,
   useCreateAssignment,
+  useDeleteAssignment,
   useDeleteSubmission,
   useUpdateSubmission,
   getListDisputesQueryKey,
@@ -68,6 +69,7 @@ export default function InstructorDashboard() {
   const { toast } = useToast();
 
   const createAssignment = useCreateAssignment();
+  const deleteAssignment = useDeleteAssignment();
   const [newAssignmentOpen, setNewAssignmentOpen] = useState(false);
   const [newCourseId, setNewCourseId] = useState("");
   const [newCourseName, setNewCourseName] = useState("");
@@ -79,6 +81,34 @@ export default function InstructorDashboard() {
   // Template Form State
   const [templateFilename, setTemplateFilename] = useState("");
   const [templateContent, setTemplateContent] = useState("");
+
+  const handleDeleteAssignment = () => {
+    if (!selectedAssignmentId) return;
+    const assignment = assignments.find(a => a.id.toString() === selectedAssignmentId);
+    if (!assignment) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete the assignment "${assignment.title}"? This will also permanently delete all related submissions and similarity reports.`
+      )
+    ) {
+      return;
+    }
+
+    deleteAssignment.mutate(
+      { id: parseInt(selectedAssignmentId, 10) },
+      {
+        onSuccess: () => {
+          toast({ title: "Assignment deleted", description: "The assignment and all associated records have been removed." });
+          setSelectedAssignmentId("");
+          queryClient.invalidateQueries({ queryKey: getListAssignmentsQueryKey() });
+        },
+        onError: (err: any) => {
+          toast({ title: "Error", description: err.message || "Failed to delete assignment.", variant: "destructive" });
+        }
+      }
+    );
+  };
 
   const handleDeleteSubmission = (id: number) => {
     if (!confirm("Are you sure you want to remove this paper?")) return;
@@ -189,9 +219,9 @@ export default function InstructorDashboard() {
     <AppLayout title="Instructor Dashboard" subtitle="Monitor submissions and analyze integrity metrics" role="instructor">
       
       <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-start md:items-end">
-        <div className="w-full md:w-1/3">
+        <div className="w-full md:w-1/3 flex gap-2 items-center">
           <Select value={selectedAssignmentId} onValueChange={setSelectedAssignmentId}>
-            <SelectTrigger className="bg-card">
+            <SelectTrigger className="bg-card flex-grow">
               <SelectValue placeholder="Select an assignment to view" />
             </SelectTrigger>
             <SelectContent>
@@ -200,6 +230,18 @@ export default function InstructorDashboard() {
               ))}
             </SelectContent>
           </Select>
+          {selectedAssignmentId && (
+            <Button
+              variant="destructive"
+              size="icon"
+              className="shrink-0"
+              onClick={handleDeleteAssignment}
+              disabled={deleteAssignment.isPending}
+              title="Delete Assignment"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         <Dialog open={newAssignmentOpen} onOpenChange={setNewAssignmentOpen}>

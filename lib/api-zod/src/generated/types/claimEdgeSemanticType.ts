@@ -6,7 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+/**
+ * Richer semantic relationship type (a subset of 'type' with more granularity)
+ */
 export type ClaimEdgeSemanticType = typeof ClaimEdgeSemanticType[keyof typeof ClaimEdgeSemanticType];
+
 
 export const ClaimEdgeSemanticType = {
   supports: 'supports',

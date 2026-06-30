@@ -442,6 +442,22 @@ paths:
                 $ref: "#/components/schemas/Assignment"
         "404":
           description: Not found
+    delete:
+      operationId: deleteAssignment
+      tags: [assignments]
+      summary: Delete an assignment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Assignment deleted
+        "404":
+          description: Not found
+
 
   /templates:
     get:

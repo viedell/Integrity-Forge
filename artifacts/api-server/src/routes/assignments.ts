@@ -6,6 +6,7 @@ import {
   GetAssignmentParams,
   ListAssignmentsResponse,
   GetAssignmentResponse,
+  DeleteAssignmentParams,
 } from "@workspace/api-zod";
 import { serializeDates } from "../lib/serialize";
 
@@ -75,4 +76,30 @@ router.get("/assignments/:id", async (req, res): Promise<void> => {
   })));
 });
 
+router.delete("/assignments/:id", async (req, res): Promise<void> => {
+  const params = DeleteAssignmentParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  // Delete within transaction to ensure atomic cascading
+  const deleted = await db.transaction(async (tx) => {
+    // Delete any dependent submissions first
+    await tx.delete(submissionsTable).where(eq(submissionsTable.assignmentId, params.data.id));
+    
+    // Delete the assignment
+    const result = await tx.delete(assignmentsTable).where(eq(assignmentsTable.id, params.data.id)).returning();
+    return result.length > 0;
+  });
+
+  if (!deleted) {
+    res.status(404).json({ error: "Assignment not found" });
+    return;
+  }
+
+  res.status(204).end();
+});
+
 export default router;
+

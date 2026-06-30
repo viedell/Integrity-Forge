@@ -372,7 +372,11 @@ export const ClaimEdgeType = {
   contradicts: 'contradicts',
 } as const;
 
+/**
+ * Richer semantic relationship type (a subset of 'type' with more granularity)
+ */
 export type ClaimEdgeSemanticType = typeof ClaimEdgeSemanticType[keyof typeof ClaimEdgeSemanticType];
+
 
 export const ClaimEdgeSemanticType = {
   supports: 'supports',
@@ -386,9 +390,17 @@ export interface ClaimEdge {
   sourceClaimId: string;
   targetClaimId: string;
   type: ClaimEdgeType;
+  /** Richer semantic relationship type (a subset of 'type' with more granularity) */
   semanticType?: ClaimEdgeSemanticType;
+  /**
+     * Deterministic confidence score for this edge
+     * @minimum 0
+     * @maximum 100
+     */
   confidence?: number;
+  /** Taxonomy-matched scientific concepts shared between the two claims */
   sharedConcepts?: string[];
+  /** Human-readable deterministic explanation of why this relationship was inferred */
   explanation?: string;
   evidence: string[];
 }
@@ -410,6 +422,7 @@ export interface AcademicInsightAnalysis {
   reliability: EvidenceReliability[];
   claimNetwork: ClaimNetwork;
   timeline: TimelineEntry[];
+  /** Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score */
   rankedConcepts: string[];
 }
 

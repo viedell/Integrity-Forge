@@ -13,5 +13,6 @@ export interface AcademicInsightAnalysis {
   reliability: EvidenceReliability[];
   claimNetwork: ClaimNetwork;
   timeline: TimelineEntry[];
+  /** Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score */
   rankedConcepts: string[];
 }

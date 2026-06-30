@@ -5,16 +5,24 @@
  * IntegrityForge API — academic integrity analysis platform
  * OpenAPI spec version: 0.1.0
  */
-import type { ClaimEdgeType } from './claimEdgeType';
 import type { ClaimEdgeSemanticType } from './claimEdgeSemanticType';
+import type { ClaimEdgeType } from './claimEdgeType';
 
 export interface ClaimEdge {
   sourceClaimId: string;
   targetClaimId: string;
   type: ClaimEdgeType;
+  /** Richer semantic relationship type (a subset of 'type' with more granularity) */
   semanticType?: ClaimEdgeSemanticType;
+  /**
+     * Deterministic confidence score for this edge
+     * @minimum 0
+     * @maximum 100
+     */
   confidence?: number;
+  /** Taxonomy-matched scientific concepts shared between the two claims */
   sharedConcepts?: string[];
+  /** Human-readable deterministic explanation of why this relationship was inferred */
   explanation?: string;
   evidence: string[];
 }

@@ -467,6 +467,11 @@ export const DeleteGapAnalysisResponse = zod.object({
 /**
  * @summary List all academic insights
  */
+export const listAcademicInsightsResponseAnalysisClaimNetworkEdgesItemConfidenceMin = 0;
+export const listAcademicInsightsResponseAnalysisClaimNetworkEdgesItemConfidenceMax = 100;
+
+
+
 export const ListAcademicInsightsResponseItem = zod.object({
   "id": zod.number(),
   "clerkId": zod.string().optional(),
@@ -503,6 +508,10 @@ export const ListAcademicInsightsResponseItem = zod.object({
   "sourceClaimId": zod.string(),
   "targetClaimId": zod.string(),
   "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "semanticType": zod.enum(['supports', 'extends', 'contradicts', 'summarizes', 'improves']).optional().describe('Richer semantic relationship type (a subset of \'type\' with more granularity)'),
+  "confidence": zod.number().min(listAcademicInsightsResponseAnalysisClaimNetworkEdgesItemConfidenceMin).max(listAcademicInsightsResponseAnalysisClaimNetworkEdgesItemConfidenceMax).optional().describe('Deterministic confidence score for this edge'),
+  "sharedConcepts": zod.array(zod.string()).optional().describe('Taxonomy-matched scientific concepts shared between the two claims'),
+  "explanation": zod.string().optional().describe('Human-readable deterministic explanation of why this relationship was inferred'),
   "evidence": zod.array(zod.string())
 }))
 }),
@@ -512,7 +521,8 @@ export const ListAcademicInsightsResponseItem = zod.object({
   "concepts": zod.array(zod.string()),
   "methodologies": zod.array(zod.string()),
   "findings": zod.array(zod.string())
-}))
+})),
+  "rankedConcepts": zod.array(zod.string()).describe('Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score')
 }),
   "createdAt": zod.string()
 })
@@ -539,6 +549,11 @@ export const CreateAcademicInsightBody = zod.object({
 export const GetAcademicInsightParams = zod.object({
   "id": zod.coerce.number()
 })
+
+export const getAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMin = 0;
+export const getAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMax = 100;
+
+
 
 export const GetAcademicInsightResponse = zod.object({
   "id": zod.number(),
@@ -576,6 +591,10 @@ export const GetAcademicInsightResponse = zod.object({
   "sourceClaimId": zod.string(),
   "targetClaimId": zod.string(),
   "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "semanticType": zod.enum(['supports', 'extends', 'contradicts', 'summarizes', 'improves']).optional().describe('Richer semantic relationship type (a subset of \'type\' with more granularity)'),
+  "confidence": zod.number().min(getAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMin).max(getAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMax).optional().describe('Deterministic confidence score for this edge'),
+  "sharedConcepts": zod.array(zod.string()).optional().describe('Taxonomy-matched scientific concepts shared between the two claims'),
+  "explanation": zod.string().optional().describe('Human-readable deterministic explanation of why this relationship was inferred'),
   "evidence": zod.array(zod.string())
 }))
 }),
@@ -585,7 +604,8 @@ export const GetAcademicInsightResponse = zod.object({
   "concepts": zod.array(zod.string()),
   "methodologies": zod.array(zod.string()),
   "findings": zod.array(zod.string())
-}))
+})),
+  "rankedConcepts": zod.array(zod.string()).describe('Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score')
 }),
   "createdAt": zod.string()
 })
@@ -597,6 +617,11 @@ export const GetAcademicInsightResponse = zod.object({
 export const DeleteAcademicInsightParams = zod.object({
   "id": zod.coerce.number()
 })
+
+export const deleteAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMin = 0;
+export const deleteAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMax = 100;
+
+
 
 export const DeleteAcademicInsightResponse = zod.object({
   "id": zod.number(),
@@ -634,6 +659,10 @@ export const DeleteAcademicInsightResponse = zod.object({
   "sourceClaimId": zod.string(),
   "targetClaimId": zod.string(),
   "type": zod.enum(['supports', 'extends', 'contradicts']),
+  "semanticType": zod.enum(['supports', 'extends', 'contradicts', 'summarizes', 'improves']).optional().describe('Richer semantic relationship type (a subset of \'type\' with more granularity)'),
+  "confidence": zod.number().min(deleteAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMin).max(deleteAcademicInsightResponseAnalysisClaimNetworkEdgesItemConfidenceMax).optional().describe('Deterministic confidence score for this edge'),
+  "sharedConcepts": zod.array(zod.string()).optional().describe('Taxonomy-matched scientific concepts shared between the two claims'),
+  "explanation": zod.string().optional().describe('Human-readable deterministic explanation of why this relationship was inferred'),
   "evidence": zod.array(zod.string())
 }))
 }),
@@ -643,7 +672,8 @@ export const DeleteAcademicInsightResponse = zod.object({
   "concepts": zod.array(zod.string()),
   "methodologies": zod.array(zod.string()),
   "findings": zod.array(zod.string())
-}))
+})),
+  "rankedConcepts": zod.array(zod.string()).describe('Top-ranked scientific concepts across the uploaded corpus, ordered by deterministic specificity score')
 }),
   "createdAt": zod.string()
 })
@@ -697,6 +727,14 @@ export const GetAssignmentResponse = zod.object({
   "submissionCount": zod.number().nullish(),
   "flaggedCount": zod.number().nullish(),
   "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete an assignment by ID
+ */
+export const DeleteAssignmentParams = zod.object({
+  "id": zod.coerce.number()
 })
 
 

@@ -1629,6 +1629,76 @@ export function useGetAssignment<TData = Awaited<ReturnType<typeof getAssignment
 
 
 
+export const getDeleteAssignmentUrl = (id: number,) => {
+
+
+
+
+  return `/api/assignments/${id}`
+}
+
+/**
+ * @summary Delete an assignment by ID
+ */
+export const deleteAssignment = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteAssignmentUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteAssignmentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAssignment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAssignment>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteAssignment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAssignment>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteAssignment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAssignmentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAssignment>>>
+
+    export type DeleteAssignmentMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete an assignment by ID
+ */
+export const useDeleteAssignment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAssignment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAssignment>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAssignmentMutationOptions(options));
+    }
+
 export const getListTemplatesUrl = () => {
 
 
